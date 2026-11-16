@@ -320,3 +320,11 @@ def test_frases_no_idioma_da_tela(cliente: TestClient) -> None:
     es = cliente.get("/api/explorar?lang=es").json()["frases"][0]
     assert es.startswith("En este recorte, el 18,4% de las 2.266 personas")
     assert cliente.get("/api/explorar?lang=fr").status_code == 400
+
+
+def test_tela_sempre_confere_se_ha_versao_nova(cliente: TestClient) -> None:
+    """Sem isso, o navegador mostra a versão antiga da tela depois de uma atualização."""
+    assert cliente.get("/static/app.css").headers["cache-control"] == "no-cache"
+    assert (
+        "cache-control" not in cliente.get("/api/explorar").headers
+    )  # a API usa o cache por carga

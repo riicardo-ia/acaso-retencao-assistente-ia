@@ -45,12 +45,12 @@ Sobe com `docker compose up --build` e abre em `http://localhost:8000`. É um **
 
 | Tela | Pergunta | Gráficos e por quê |
 |---|---|---|
-| **A resposta** (abre primeiro; fixa, base inteira) | O que faz voltar, quanto pesa cada fator e quanto disso vinha do perfil de quem chega? | Tudo em **"de cada 100 pessoas"**. No topo, o número principal com a margem de erro; **"o que mais pesa"**: ponto e linha por fator (o efeito e a margem de erro, ordenados pelo tamanho; a linha que cruza o zero mostra na hora o que não faz diferença); **"quanto vinha do perfil"**: dois pontos por fator, a diferença comparando todo mundo e a que sobra comparando pessoas parecidas (a distância entre eles é a seleção). Depois, os 3 achados em **barras com margem de erro** e "o que fazer"; GPT-4 por três formas de medir; a semana de 20/11 em barras e na tabela perfil × retorno; **retorno semana a semana** com a faixa do acaso (separa variação real de sorte); mediadores, insatisfação, sensibilidade às regras e como os temas foram classificados. Termos técnicos (IC, regressão, IPW, pseudo-R²) só no detalhe técnico |
-| **Explorar** (com filtros: período do 1º uso, idioma, dispositivo, tema da 1ª conversa, modelo) | Neste recorte, quantos voltam, como isso evoluiu e quem volta mais? | Números principais; **linha** do retorno mês a mês com a margem de erro sombreada (tendência); **colunas** de pessoas novas por mês (volume); **barras horizontais** por idioma, dispositivo, modelo e tema (comparar grupos); barras lado a lado "% das pessoas × % das conversas" por tema (peso de quem usa muito). Frases por regra que mudam com o filtro. No topo, uma faixa-resumo da resposta, que não muda com os filtros |
+| **A resposta** (abre primeiro; fixa, base inteira) | As três perguntas do cliente, cada uma com um gráfico próprio | No topo, três cartões em %: o retorno (18,4%, margem de 16,8% a 20,0%), as pessoas analisadas e o retorno se a volta no mesmo dia contasse (28,1%). Depois, um bloco por pergunta, com a pergunta como título e a resposta em uma frase: **1. O que faz voltar?** barras com o retorno de cada grupo em %, com margem de erro e a média de todos (comparação simples, avisada na tela); **2. Quais fatores têm o maior efeito?** ranking dos efeitos em pontos percentuais, comparando pessoas parecidas, com a margem de erro (a linha que cruza o zero mostra o que não faz diferença); **3. Quanto pesa cada um e quanto é causa e não seleção?** duas barras sobrepostas por fator: a listrada é a diferença comparando todo mundo, a cheia é o que continua comparando pessoas parecidas; a sobra listrada é seleção, e a tela lembra que causa só se prova com teste A/B. Em seguida, os 3 achados com "o que fazer", GPT-4 por três formas de medir, a semana de 20/11 (perfil × retorno), o retorno semana a semana com a faixa do acaso, mediadores, insatisfação, sensibilidade às regras e como os temas foram classificados. Termos técnicos só no detalhe recolhível |
+| **Explorar** (com filtros: período do 1º uso, idioma, dispositivo, tema da 1ª conversa, modelo) | Neste recorte, quantos voltam, como isso evoluiu e quem volta mais? | Números principais; **linha** do retorno mês a mês com a margem de erro sombreada (tendência); **colunas** de pessoas novas por mês (volume); **barras horizontais** por idioma, dispositivo, modelo e tema (comparar grupos); barras lado a lado "% das pessoas × % das conversas" por tema (peso de quem usa muito). Frases por regra que mudam com o filtro |
 
 **Documentação.** Um terceiro link no topo abre, dentro do próprio dashboard, os documentos do repositório: este documento, os BDRs e ADRs, a análise passo a passo, os indicadores e o incidente. Só são servidos os arquivos de uma lista fechada, convertidos de Markdown no servidor.
 
-**Linguagem.** "De cada 100 pessoas", "margem de erro", "mesmo considerando idioma, aparelho, horário, tema e época", "pode ser acaso", "não faz diferença comprovada". Cada gráfico tem "Como calculamos?" com uma explicação simples e o detalhe técnico recolhível, mais a consulta SQL.
+**Linguagem.** Retornos em %, com uma casa decimal; diferenças em pontos percentuais, com um exemplo de leitura ("sair de 21% para 6% é −15 p.p."); "margem de erro", "mesmo considerando idioma, aparelho, horário, tema e época", "pode ser acaso", "não faz diferença comprovada". Cada gráfico tem "Como calculamos?" com uma explicação simples e o detalhe técnico recolhível, mais a consulta SQL.
 
 **Frases automáticas (Explorar).** São regras fixas, sem LLM (`app/insights.py`, testadas):
 - com menos de 30 pessoas, não concluem nada;
@@ -103,7 +103,7 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 | `vw_usuarios` / `mv_usuarios` | uma pessoa elegível: 1º dia, semana, voltou | `usuario_id` | SQL (definição do BDR-001) |
 | `vw_explorar` | `mv_usuarios` + `perfil_usuario` | `usuario_id` | app (tela Explorar) |
 | `mv_coortes_semanais`, `vw_retorno_geral` | semana / total, com IC de Wilson | `semana` | app |
-| `efeitos`, `gpt4_selecao`, `semana_decomposicao`, `sensibilidade`, `testes`, `uso_por_categoria` | resultados da análise estatística | — | carga → app (Análise completa) |
+| `efeitos`, `gpt4_selecao`, `semana_decomposicao`, `sensibilidade`, `testes`, `uso_por_categoria` | resultados da análise estatística | — | carga → app (A resposta) |
 | `cargas`, `migracoes` | uma execução / uma migração | `id` / `nome` | carga → app (procedência) |
 
 **Endpoints**
@@ -119,15 +119,16 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 Documentação interativa em `/api/docs`.
 
 **Outros países.**
-- **Interface: pronta.** A tela já está em português, inglês e espanhol (seletor no topo, ou `/?lang=en`). Cada texto passa por uma função de tradução com o português como chave; as traduções ficam em `app/static/i18n.json`, e `tests/test_traducoes.py` falha se uma frase nova ficar sem tradução. Números e datas seguem o formato de cada idioma, e as frases automáticas vêm da API no idioma da tela (`lang`). Os documentos continuam em português.
+- **Interface: pronta.** A tela já está em português, inglês e espanhol (seletor no topo, ou `/?lang=en`). Cada texto passa por uma função de tradução com o português como chave; as traduções ficam em `app/static/i18n.json`, e `tests/test_traducoes.py` falha se uma frase nova ficar sem tradução. Números e datas seguem o formato de cada idioma, e as frases automáticas vêm da API no idioma da tela (`lang`). Os documentos continuam em português: a página Documentação abre sempre em português, sem o seletor de idioma.
 - **Fuso: ainda fixo.** É o ponto crítico, porque o retorno é por dia local. Hoje `'America/Sao_Paulo'` está em `vw_usuarios` e no banco. Para outros países, o fuso vira coluna por país (ou por estado, para países com vários, como o próprio Brasil), usada em `vw_usuarios` no lugar da constante.
 - **Comparação: ainda não existe.** `pais` entra como dimensão em todas as tabelas do `mart` e nas rotas (`?pais=`). O modelo de efeitos roda por país, e os países são comparados pelos efeitos com IC, não por taxas brutas, porque o perfil de chegada muda entre eles.
 - **Temas:** precisam de revalidação por idioma.
 
 **Desempenho.**
-- **Pré-calculado:** tudo o que é pesado (coortes em view materializada, efeitos e testes em tabela) é calculado na carga.
-- **Cache:** a API guarda o resultado de cada consulta em cache **por carga**, ou seja, o cache expira quando uma carga nova é publicada.
-- **Medição:** cada resposta traz `server-timing` e um log JSON com `request_id` e duração. Medido localmente: ~25–40 ms na 1ª chamada de cada recorte e 2–3 ms com cache (o cache é por recorte de filtros e por carga).
+- **Pré-calculado:** a definição de "voltou" é materializada uma vez por carga, no grão pessoa (`mv_usuarios`, 2.266 linhas com 1º dia, semana e se voltou). Qualquer filtro da tela vira uma leitura dessas linhas prontas, sem recalcular eventos. As coortes ficam em view materializada, e os efeitos e testes estatísticos, em tabela: o modelo roda na carga, nunca na requisição.
+- **Cache:** a API guarda o resultado de cada consulta em memória, com a **versão da carga na chave**. O cache expira exatamente quando uma carga nova é publicada, sem prazo chutado. Cada requisição faz uma consulta mínima em `mart.cargas` para saber a versão.
+- **Medição:** cada resposta traz o cabeçalho `server-timing` (aparece no navegador) e um log JSON com `request_id`, rota, parâmetros, status e duração. Medido localmente: 10 a 85 ms na 1ª chamada de cada rota ou recorte (a primeira da API inclui abrir a conexão) e cerca de 3 ms com cache.
+- **Em produção:** p50 e p95 por rota no CloudWatch Logs Insights, com alarme; o tempo no navegador ainda não é medido (próximo passo).
 
 ## 5. Sustentação
 
@@ -136,6 +137,8 @@ Documentação interativa em `/api/docs`.
 - **Base:** migrações numeradas com a decisão comentada no topo.
 - **Backend:** log JSON por requisição (`request_id`, rota, status, duração).
 - **Tela:** o rodapé mostra a carga, a versão e se a reconciliação passou.
+
+**Próximo passo de rastreabilidade (desenhado, não implementado):** ligar cada número à sua origem por chaves. Uma tabela `usuarios` como dimensão, com chaves estrangeiras de `conversas`, `perfil_usuario` e `eventos`; cada evento com o `turn_identifier` da base bruta e o `conv_id` da conversa; `carga_id` em todas as tabelas; a carga que falha registrada numa transação separada; a versão igual ao commit e o hash dos arquivos de origem em `mart.cargas`; e o `request_id` no rodapé da tela. A cadeia fica: tela (`request_id`) → log da API → `mart.cargas` (commit, origem, reconciliação) → linha (`carga_id`) → evento (`turn_identifier`) → base bruta. Hoje a ligação com a base bruta já existe pela conversa (`conv_id` = 1º `turn_identifier`) e pela pessoa (o mesmo sal recalcula o pseudônimo a partir do `hashed_ip`).
 
 **Como perceber a divergência antes do cliente:** a carga compara o retorno por coorte em SQL e em Python e **não publica** se divergir. Em produção, há ainda um alarme do CloudWatch para carga com erro ou para a razão "usuários ÷ IPs" fora do histórico (o sintoma do §4.2).
 

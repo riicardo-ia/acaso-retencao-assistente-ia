@@ -171,10 +171,6 @@
   "en": "model",
   "es": "modelo"
  },
- "Uma inteligência artificial leu o que cada pessoa escreveu e escolheu o tema da conversa entre <b>11 opções definidas por nós</b>, sem poder inventar outra. Antes de usar, testamos se ela é confiável: repetindo a classificação, o tema foi o mesmo em <b>96 de cada 100 conversas</b>.": {
-  "en": "An artificial intelligence read what each person wrote and chose the topic of the conversation from <b>11 options we defined</b>, without being able to invent another. Before using it, we tested whether it is reliable: repeating the classification, the topic was the same in <b>96 out of every 100 conversations</b>.",
-  "es": "Una inteligencia artificial leyó lo que escribió cada persona y eligió el tema de la conversación entre <b>11 opciones definidas por nosotros</b>, sin poder inventar otra. Antes de usarla, comprobamos si es confiable: al repetir la clasificación, el tema fue el mismo en <b>96 de cada 100 conversaciones</b>."
- },
  "<b>Rótulos predefinidos:</b> os 11 temas saíram dos próprios dados (agrupamento estatístico das conversas) e foram revisados manualmente.": {
   "en": "<b>Predefined labels:</b> the 11 topics came from the data itself (statistical clustering of the conversations) and were reviewed by hand.",
   "es": "<b>Etiquetas predefinidas:</b> los 11 temas salieron de los propios datos (agrupamiento estadístico de las conversaciones) y se revisaron manualmente."
@@ -343,10 +339,6 @@
   "en": "Explore",
   "es": "Explorar"
  },
- "Escolha um recorte nos filtros acima e veja quantas pessoas voltaram a usar o assistente em até 7 dias, como isso evoluiu e quais grupos voltam mais ou menos. Todos os números abaixo da faixa-resumo mudam com os filtros.": {
-  "en": "Choose a segment in the filters above and see how many people came back to the assistant within 7 days, how this evolved and which groups come back more or less. All numbers below the summary strip change with the filters.",
-  "es": "Elige un recorte en los filtros de arriba y mira cuántas personas volvieron a usar el asistente en 7 días o menos, cómo evolucionó y qué grupos vuelven más o menos. Todos los números debajo de la franja de resumen cambian con los filtros."
- },
  "O que este recorte mostra": {
   "en": "What this segment shows",
   "es": "Qué muestra este recorte"
@@ -471,22 +463,6 @@
   "en": "By group (example: by topic; the other dimensions only change the grouped column)",
   "es": "Por grupo (ejemplo: por tema; las otras dimensiones solo cambian la columna agrupada)"
  },
- "{n} a menos em cada 100": {
-  "en": "{n} fewer out of every 100",
-  "es": "{n} menos de cada 100"
- },
- "{n} a mais em cada 100": {
-  "en": "{n} more out of every 100",
-  "es": "{n} más de cada 100"
- },
- "algo entre {a} a menos e {b} a mais": {
-  "en": "somewhere between {a} fewer and {b} more",
-  "es": "algo entre {a} menos y {b} más"
- },
- "algo entre {a} e {b}": {
-  "en": "somewhere between {a} and {b}",
-  "es": "algo entre {a} y {b}"
- },
  "mesmo considerando idioma, aparelho, horário, tema e época": {
   "en": "even accounting for language, device, time of day, topic and period",
   "es": "aun teniendo en cuenta idioma, dispositivo, horario, tema y época"
@@ -507,14 +483,6 @@
   "en": "no proven difference",
   "es": "no hay diferencia comprobada"
  },
- "Voltam de cada 100 pessoas": {
-  "en": "Come back, out of every 100 people",
-  "es": "Vuelven, de cada 100 personas"
- },
- "Voltam {n} de cada 100": {
-  "en": "{n} out of every 100 come back",
-  "es": "Vuelven {n} de cada 100"
- },
  "O que mais pesa no retorno": {
   "en": "What weighs most on the return",
   "es": "Lo que más pesa en el retorno"
@@ -534,14 +502,6 @@
  "Não faz diferença comprovada": {
   "en": "No proven difference",
   "es": "No hay diferencia comprobada"
- },
- "em cada 100": {
-  "en": "out of every 100",
-  "es": "de cada 100"
- },
- "Voltam {n} de cada 100 ({p} pessoas); comparação: {ref}, {r}.": {
-  "en": "{n} out of every 100 come back ({p} people); comparison: {ref}, {r}.",
-  "es": "Vuelven {n} de cada 100 ({p} personas); comparación: {ref}, {r}."
  },
  "não há diferença para explicar": {
   "en": "no difference to explain",
@@ -566,10 +526,6 @@
  "quase tudo vinha do perfil": {
   "en": "almost all of it came from the profile",
   "es": "casi todo venía del perfil"
- },
- "Quanto da diferença vinha do perfil de quem chega": {
-  "en": "How much of the difference came from the profile of who arrives",
-  "es": "Cuánto de la diferencia venía del perfil de quien llega"
  },
  "Comparando todo mundo:": {
   "en": "Comparing everyone:",
@@ -631,30 +587,6 @@
   "en": "GPT-4 × GPT-3.5",
   "es": "GPT-4 × GPT-3.5"
  },
- "A resposta, em resumo": {
-  "en": "The answer, in short",
-  "es": "La respuesta, en resumen"
- },
- "(base inteira, não muda com os filtros)": {
-  "en": "(whole base, does not change with the filters)",
-  "es": "(toda la base, no cambia con los filtros)"
- },
- "<b>{n} de cada 100</b> pessoas voltam em até 7 dias.": {
-  "en": "<b>{n} out of every 100</b> people come back within 7 days.",
-  "es": "<b>{n} de cada 100</b> personas vuelven en 7 días o menos."
- },
- "<b>Afasta</b>, em cada 100:": {
-  "en": "<b>Drives people away</b>, out of every 100:",
-  "es": "<b>Aleja</b>, de cada 100:"
- },
- "Usar GPT-4 <b>não faz diferença comprovada</b>.": {
-  "en": "Using GPT-4 <b>makes no proven difference</b>.",
-  "es": "Usar GPT-4 <b>no hace una diferencia comprobada</b>."
- },
- "Ver a resposta completa": {
-  "en": "See the full answer",
-  "es": "Ver la respuesta completa"
- },
  "Diagnóstico do modelo: {n} pessoas; pseudo-R² = {r} (a primeira experiência explica pouco do retorno, o que é esperado com tão pouca informação por pessoa).": {
   "en": "Model diagnostics: {n} people; pseudo-R² = {r} (the first experience explains little of the return, which is expected with so little information per person).",
   "es": "Diagnóstico del modelo: {n} personas; pseudo-R² = {r} (la primera experiencia explica poco del retorno, lo esperado con tan poca información por persona)."
@@ -667,25 +599,13 @@
   "en": "Arrives with a real request",
   "es": "Llega con un pedido real"
  },
- "Faz diferença: <b>{a}</b> e <b>{b}</b>, {considerando}. São {n} de cada 100 pessoas que chegam.": {
-  "en": "Makes a difference: <b>{a}</b> and <b>{b}</b>, {considerando}. They are {n} out of every 100 people who arrive.",
-  "es": "Hace diferencia: <b>{a}</b> y <b>{b}</b>, {considerando}. Son {n} de cada 100 personas que llegan."
- },
  "1ª conversa com GPT-3.5": {
   "en": "1st conversation with GPT-3.5",
   "es": "1.ª conversación con GPT-3.5"
  },
- "Não faz diferença comprovada, {considerando} ({faixa} em cada 100). E não é porque “quem escolhe GPT-4 já é mais fiel”: medimos isso também (abaixo).": {
-  "en": "No proven difference, {considerando} ({faixa} out of every 100). And it is not because “people who choose GPT-4 are already more loyal”: we measured that too (below).",
-  "es": "No hay diferencia comprobada, {considerando} ({faixa} de cada 100). Y no es porque “quien elige GPT-4 ya es más fiel”: también lo medimos (abajo)."
- },
  "Faz diferença: <b>{a}</b> ({faixa}), {considerando}.": {
   "en": "Makes a difference: <b>{a}</b> ({faixa}), {considerando}.",
   "es": "Hace diferencia: <b>{a}</b> ({faixa}), {considerando}."
- },
- "Voltaram em até 7 dias, de cada 100 pessoas (a linha fina é a margem de erro):": {
-  "en": "Came back within 7 days, out of every 100 people (the thin line is the margin of error):",
-  "es": "Volvieron en 7 días o menos, de cada 100 personas (la línea fina es el margen de error):"
  },
  "O que fazer:": {
   "en": "What to do:",
@@ -702,22 +622,6 @@
  "Voltam em até 7 dias": {
   "en": "Come back within 7 days",
   "es": "Vuelven en 7 días o menos"
- },
- "{n} de cada 100": {
-  "en": "{n} out of every 100",
-  "es": "{n} de cada 100"
- },
- "margem de erro: entre {a} e {b} · {n} pessoas": {
-  "en": "margin of error: between {a} and {b} · {n} people",
-  "es": "margen de error: entre {a} y {b} · {n} personas"
- },
- "Voltar = usar de novo em outro dia, até 7 dias depois do primeiro uso. Se voltar no mesmo dia contasse, seriam {n} de cada 100.": {
-  "en": "Coming back = using it again on another day, up to 7 days after the first use. If coming back on the same day counted, it would be {n} out of every 100.",
-  "es": "Volver = usarlo de nuevo otro día, hasta 7 días después del primer uso. Si volver el mismo día contara, serían {n} de cada 100."
- },
- "Quantas pessoas a mais ou a menos voltam, em cada 100, comparando pessoas parecidas em idioma, aparelho, horário, tema e época. A linha fina é a margem de erro: quando ela cruza o zero, não dá para afirmar que há diferença.": {
-  "en": "How many more or fewer people come back, out of every 100, comparing people similar in language, device, time of day, topic and period. The thin line is the margin of error: when it crosses zero, we cannot say there is a difference.",
-  "es": "Cuántas personas más o menos vuelven, de cada 100, comparando personas parecidas en idioma, dispositivo, horario, tema y época. La línea fina es el margen de error: cuando cruza el cero, no se puede afirmar que haya diferencia."
  },
  "<b>Começou à noite</b> é efeito da forma de medir: quem começa às 23h e continua depois da meia-noite já conta como “voltou outro dia”. Não é algo que o produto controle.": {
   "en": "<b>Started at night</b> is an effect of how it is measured: someone who starts at 11 pm and keeps going after midnight already counts as “came back on another day”. It is not something the product controls.",
@@ -743,17 +647,9 @@
   "en": "Diagnostics",
   "es": "Diagnóstico"
  },
- "Círculo vazio: a diferença que se vê comparando todo mundo. Círculo cheio: a diferença que sobra comparando pessoas parecidas. O que some entre os dois vinha do perfil de quem chega, não do assistente.": {
-  "en": "Hollow circle: the difference seen when comparing everyone. Filled circle: the difference left when comparing similar people. What disappears between the two came from the profile of who arrives, not from the assistant.",
-  "es": "Círculo vacío: la diferencia que se ve comparando a todos. Círculo lleno: la diferencia que queda comparando personas parecidas. Lo que desaparece entre los dos venía del perfil de quien llega, no del asistente."
- },
  "comparando todo mundo": {
   "en": "comparing everyone",
   "es": "comparando a todos"
- },
- "comparando pessoas parecidas": {
-  "en": "comparing similar people",
-  "es": "comparando personas parecidas"
  },
  "Ainda não está provado que mudar a primeira experiência fará as pessoas voltarem. Por isso, cada decisão vem com um teste A/B.": {
   "en": "It is not yet proven that changing the first experience will make people come back. That is why each decision comes with an A/B test.",
@@ -762,10 +658,6 @@
  "A diferença “comparando todo mundo” mistura o efeito da característica com o perfil de quem a tem (tema, aparelho, idioma, horário e época). Comparando pessoas parecidas, sobra a parte que não se explica por esse perfil.": {
   "en": "The difference “comparing everyone” mixes the effect of the characteristic with the profile of those who have it (topic, device, language, time of day and period). Comparing similar people, what is left is the part not explained by that profile.",
   "es": "La diferencia “comparando a todos” mezcla el efecto de la característica con el perfil de quien la tiene (tema, dispositivo, idioma, horario y época). Comparando personas parecidas, queda la parte que ese perfil no explica."
- },
- "Círculo vazio: diferença bruta de proporções; círculo cheio: efeito marginal médio da regressão logística (o mesmo do gráfico acima). Parte que vinha do perfil = (bruto − ajustado) ÷ bruto.": {
-  "en": "Hollow circle: raw difference in proportions; filled circle: average marginal effect of the logistic regression (the same as in the chart above). Part that came from the profile = (raw − adjusted) ÷ raw.",
-  "es": "Círculo vacío: diferencia bruta de proporciones; círculo lleno: efecto marginal medio de la regresión logística (el mismo del gráfico de arriba). Parte que venía del perfil = (bruto − ajustado) ÷ bruto."
  },
  "Os três achados e o que fazer": {
   "en": "The three findings and what to do",
@@ -786,10 +678,6 @@
  "Forma de medir": {
   "en": "How it was measured",
   "es": "Forma de medir"
- },
- "Em cada 100 pessoas": {
-  "en": "Out of every 100 people",
-  "es": "De cada 100 personas"
  },
  "Quando a pessoa escolhia o GPT-4": {
   "en": "When the person chose GPT-4",
@@ -827,10 +715,6 @@
   "en": "4 previous weeks",
   "es": "4 semanas anteriores"
  },
- "<b>A queda de {d} veio de quem chegou ou de como as pessoas voltaram?</b> Em pontos de cada 100:": {
-  "en": "<b>Did the drop on {d} come from who arrived or from how people came back?</b> In points out of every 100:",
-  "es": "<b>¿La caída del {d} vino de quién llegó o de cómo volvieron las personas?</b> En puntos de cada 100:"
- },
  "Separando por": {
   "en": "Split by",
   "es": "Separando por"
@@ -842,10 +726,6 @@
  "Mudança no retorno dentro de cada perfil": {
   "en": "Change in return within each profile",
   "es": "Cambio en el retorno dentro de cada perfil"
- },
- "<b>Não mudou o tipo de pessoa que chegou</b>: {a} de cada 100 chegaram com um pedido real, contra {b} antes. <b>Mudou o retorno de quem chegou</b>: entre quem chegou com pedido real, {c} de cada 100 voltavam; nessa semana, {d}.": {
-  "en": "<b>The kind of person who arrived did not change</b>: {a} out of every 100 arrived with a real request, versus {b} before. <b>The return of who arrived changed</b>: among those with a real request, {c} out of every 100 used to come back; that week, {d}.",
-  "es": "<b>No cambió el tipo de persona que llegó</b>: {a} de cada 100 llegaron con un pedido real, frente a {b} antes. <b>Cambió el retorno de quien llegó</b>: entre quienes llegaron con un pedido real, volvían {c} de cada 100; esa semana, {d}."
  },
  "<b>Não mudou o tipo de pessoa que chegou. Mudou o retorno de quem chegou.</b>": {
   "en": "<b>The kind of person who arrived did not change. The return of who arrived did.</b>",
@@ -919,10 +799,6 @@
   "en": "base average",
   "es": "promedio de la base"
  },
- "Se todas as semanas tivessem o mesmo retorno da base inteira ({n} de cada 100), 95 de cada 100 semanas cairiam dentro da faixa cinza só por sorte. Com cerca de 37 semanas, é normal uma ou duas ficarem fora.": {
-  "en": "If all weeks had the same return as the whole base ({n} out of every 100), 95 out of every 100 weeks would fall inside the gray band just by luck. With about 37 weeks, it is normal for one or two to fall outside.",
-  "es": "Si todas las semanas tuvieran el mismo retorno de toda la base ({n} de cada 100), 95 de cada 100 semanas caerían dentro de la franja gris solo por suerte. Con unas 37 semanas, es normal que una o dos queden fuera."
- },
  "Faixa = p ± 1,96 × √(p(1−p)/n), com p = retorno da base inteira e n = pessoas da semana.": {
   "en": "Band = p ± 1.96 × √(p(1−p)/n), with p = return of the whole base and n = people in the week.",
   "es": "Franja = p ± 1,96 × √(p(1−p)/n), con p = retorno de toda la base y n = personas de la semana."
@@ -939,10 +815,6 @@
   "en": "Engagement signals: they describe the return, they do not explain it",
   "es": "Señales de engagement: describen el retorno, no lo explican"
  },
- "Quem conversa 5 vezes ou mais no primeiro dia volta <b>{a} de cada 100</b> (contra {b} de quem conversa menos), e quem usa mais de um tema volta <b>{c}</b> (contra {d}).": {
-  "en": "People who chat 5 times or more on the first day come back <b>{a} out of every 100</b> (versus {b} for those who chat less), and people who use more than one topic come back <b>{c}</b> (versus {d}).",
-  "es": "Quien conversa 5 veces o más el primer día vuelve <b>{a} de cada 100</b> (frente a {b} de quien conversa menos), y quien usa más de un tema vuelve <b>{c}</b> (frente a {d})."
- },
  "Isso é consequência de uma boa primeira experiência, não algo que o produto ligue diretamente. Por isso fica fora da comparação acima.": {
   "en": "This is a consequence of a good first experience, not something the product switches on directly. That is why it is left out of the comparison above.",
   "es": "Esto es consecuencia de una buena primera experiencia, no algo que el producto active directamente. Por eso queda fuera de la comparación de arriba."
@@ -950,14 +822,6 @@
  "Insatisfação na primeira conversa": {
   "en": "Dissatisfaction in the first conversation",
   "es": "Insatisfacción en la primera conversación"
- },
- "Entre quem mandou mais de uma mensagem, quem corrigiu, repetiu ou reclamou volta praticamente o mesmo que os demais: <b>{faixa} em cada 100</b>. A diferença pode ser acaso.": {
-  "en": "Among people who sent more than one message, those who corrected, repeated or complained come back about the same as the others: <b>{faixa} out of every 100</b>. The difference may be chance.",
-  "es": "Entre quienes mandaron más de un mensaje, quien corrigió, repitió o se quejó vuelve prácticamente igual que los demás: <b>{faixa} de cada 100</b>. La diferencia puede ser azar."
- },
- "Uma inteligência artificial marcou, nas conversas com mais de uma mensagem, quem corrigiu, repetiu ou reclamou da resposta. A marcação se repete em 93 de cada 100 casos quando refeita.": {
-  "en": "An artificial intelligence flagged, in conversations with more than one message, who corrected, repeated or complained about the answer. The flag repeats in 93 out of every 100 cases when redone.",
-  "es": "Una inteligencia artificial marcó, en las conversaciones con más de un mensaje, quién corrigió, repitió o se quejó de la respuesta. La marca se repite en 93 de cada 100 casos al rehacerla."
  },
  "Mesmo modelo dos efeitos, só com quem mandou mais de uma mensagem ({n} pessoas); IC 95% pelo método delta; estabilidade da marcação: κ de Cohen = 0,93.": {
   "en": "Same model as the effects, only with people who sent more than one message ({n} people); 95% CI by the delta method; stability of the flag: Cohen's κ = 0.93.",
@@ -974,10 +838,6 @@
  "Regra": {
   "en": "Rule",
   "es": "Regla"
- },
- "Voltam de cada 100": {
-  "en": "Come back, out of every 100",
-  "es": "Vuelven, de cada 100"
  },
  "Margem de erro": {
   "en": "Margin of error",
@@ -1006,10 +866,6 @@
  "As decisões, a análise passo a passo, os indicadores e a arquitetura, como estão no repositório.": {
   "en": "The decisions, the step-by-step analysis, the indicators and the architecture, as they are in the repository.",
   "es": "Las decisiones, el análisis paso a paso, los indicadores y la arquitectura, tal como están en el repositorio."
- },
- "Os documentos estão em português.": {
-  "en": "The documents are in Portuguese.",
-  "es": "Los documentos están en portugués."
  },
  "Documentos": {
   "en": "Documents",
@@ -1150,5 +1006,181 @@
  "6 · A resposta, com os efeitos": {
   "en": "6 · The answer, with the effects",
   "es": "6 · La respuesta, con los efectos"
+ },
+ "Escolha um recorte nos filtros acima e veja quantas pessoas voltaram a usar o assistente em até 7 dias, como isso evoluiu e quais grupos voltam mais ou menos. Todos os números mudam com os filtros.": {
+  "en": "Choose a segment in the filters above and see how many people came back to the assistant within 7 days, how this evolved and which groups come back more or less. All numbers change with the filters.",
+  "es": "Elige un recorte en los filtros de arriba y mira cuántas personas volvieron a usar el asistente en 7 días o menos, cómo evolucionó y qué grupos vuelven más o menos. Todos los números cambian con los filtros."
+ },
+ "Voltar = usar de novo em outro dia, até 7 dias depois do primeiro uso.": {
+  "en": "Coming back = using it again on another day, up to 7 days after the first use.",
+  "es": "Volver = usarlo de nuevo otro día, hasta 7 días después del primer uso."
+ },
+ "Pessoas analisadas": {
+  "en": "People analyzed",
+  "es": "Personas analizadas"
+ },
+ "usaram o assistente pela 1ª vez entre {a} e {b}": {
+  "en": "used the assistant for the 1st time between {a} and {b}",
+  "es": "usaron el asistente por 1.ª vez entre {a} y {b}"
+ },
+ "Se voltar no mesmo dia contasse": {
+  "en": "If coming back on the same day counted",
+  "es": "Si volver el mismo día contara"
+ },
+ "é a regra de contagem que mais muda o número; usamos a de outro dia": {
+  "en": "it is the counting rule that changes the number most; we use the other-day rule",
+  "es": "es la regla de conteo que más cambia el número; usamos la de otro día"
+ },
+ "<b>A queda de {d} veio de quem chegou ou de como as pessoas voltaram?</b> Em pontos percentuais:": {
+  "en": "<b>Did the drop on {d} come from who arrived or from how people came back?</b> In percentage points:",
+  "es": "<b>¿La caída del {d} vino de quién llegó o de cómo volvieron las personas?</b> En puntos porcentuales:"
+ },
+ "<b>Não mudou o tipo de pessoa que chegou</b>: {a} chegaram com um pedido real, contra {b} antes. <b>Mudou o retorno de quem chegou</b>: entre quem chegou com pedido real, {c} voltavam; nessa semana, {d}.": {
+  "en": "<b>The kind of person who arrived did not change</b>: {a} arrived with a real request, versus {b} before. <b>The return of who arrived changed</b>: among those with a real request, {c} used to come back; that week, {d}.",
+  "es": "<b>No cambió el tipo de persona que llegó</b>: {a} llegaron con un pedido real, frente a {b} antes. <b>Cambió el retorno de quien llegó</b>: entre quienes llegaron con un pedido real, volvían {c}; esa semana, {d}."
+ },
+ "Diferença no retorno": {
+  "en": "Difference in return",
+  "es": "Diferencia en el retorno"
+ },
+ "Entre quem mandou mais de uma mensagem, quem corrigiu, repetiu ou reclamou volta praticamente o mesmo que os demais: <b>{faixa}</b>. A diferença pode ser acaso.": {
+  "en": "Among people who sent more than one message, those who corrected, repeated or complained come back about the same as the others: <b>{faixa}</b>. The difference may be chance.",
+  "es": "Entre quienes mandaron más de un mensaje, quien corrigió, repitió o se quejó vuelve prácticamente igual que los demás: <b>{faixa}</b>. La diferencia puede ser azar."
+ },
+ "Faz diferença: <b>{a}</b> e <b>{b}</b>, {considerando}. São {n} das pessoas que chegam.": {
+  "en": "Makes a difference: <b>{a}</b> and <b>{b}</b>, {considerando}. They are {n} of the people who arrive.",
+  "es": "Hace diferencia: <b>{a}</b> y <b>{b}</b>, {considerando}. Son el {n} de las personas que llegan."
+ },
+ "Não faz diferença comprovada, {considerando} ({faixa}). E não é porque “quem escolhe GPT-4 já é mais fiel”: medimos isso também (abaixo).": {
+  "en": "No proven difference, {considerando} ({faixa}). And it is not because “people who choose GPT-4 are already more loyal”: we measured that too (below).",
+  "es": "No hay diferencia comprobada, {considerando} ({faixa}). Y no es porque “quien elige GPT-4 ya es más fiel”: también lo medimos (abajo)."
+ },
+ "Quanto o retorno sobe ou desce, em pontos percentuais (p.p.), comparando pessoas parecidas em idioma, aparelho, horário, tema e época. Exemplo: sair de 21% para 6% é −15 p.p. A linha fina é a margem de erro: quando ela cruza o zero, não dá para afirmar que há diferença.": {
+  "en": "How much the return goes up or down, in percentage points (pp), comparing people similar in language, device, time of day, topic and period. Example: going from 21% to 6% is −15 pp. The thin line is the margin of error: when it crosses zero, we cannot say there is a difference.",
+  "es": "Cuánto sube o baja el retorno, en puntos porcentuales (p.p.), comparando personas parecidas en idioma, dispositivo, horario, tema y época. Ejemplo: pasar de 21% a 6% es −15 p.p. La línea fina es el margen de error: cuando cruza el cero, no se puede afirmar que haya diferencia."
+ },
+ "Quem conversa 5 vezes ou mais no primeiro dia volta <b>{a}</b> (contra {b} de quem conversa menos), e quem usa mais de um tema volta <b>{c}</b> (contra {d}).": {
+  "en": "People who chat 5 times or more on the first day come back <b>{a}</b> (versus {b} for those who chat less), and people who use more than one topic come back <b>{c}</b> (versus {d}).",
+  "es": "Quien conversa 5 veces o más el primer día vuelve <b>{a}</b> (frente a {b} de quien conversa menos), y quien usa más de un tema vuelve <b>{c}</b> (frente a {d})."
+ },
+ "Retorno": {
+  "en": "Return",
+  "es": "Retorno"
+ },
+ "Retorno em até 7 dias, em %": {
+  "en": "Return within 7 days, in %",
+  "es": "Retorno en 7 días o menos, en %"
+ },
+ "Se todas as semanas tivessem o mesmo retorno da base inteira ({n}), 95% das semanas cairiam dentro da faixa cinza só por sorte. Com cerca de 37 semanas, é normal uma ou duas ficarem fora.": {
+  "en": "If all weeks had the same return as the whole base ({n}), 95% of the weeks would fall inside the gray band just by luck. With about 37 weeks, it is normal for one or two to fall outside.",
+  "es": "Si todas las semanas tuvieran el mismo retorno de toda la base ({n}), el 95% de las semanas caería dentro de la franja gris solo por suerte. Con unas 37 semanas, es normal que una o dos queden fuera."
+ },
+ "Uma inteligência artificial leu o que cada pessoa escreveu e escolheu o tema da conversa entre <b>11 opções definidas por nós</b>, sem poder inventar outra. Antes de usar, testamos se ela é confiável: repetindo a classificação, o tema foi o mesmo em <b>96% das conversas</b>.": {
+  "en": "An artificial intelligence read what each person wrote and chose the topic of the conversation from <b>11 options we defined</b>, without being able to invent another. Before using it, we tested whether it is reliable: repeating the classification, the topic was the same in <b>96% of conversations</b>.",
+  "es": "Una inteligencia artificial leyó lo que escribió cada persona y eligió el tema de la conversación entre <b>11 opciones definidas por nosotros</b>, sin poder inventar otra. Antes de usarla, comprobamos si es confiable: al repetir la clasificación, el tema fue el mismo en <b>el 96% de las conversaciones</b>."
+ },
+ "Uma inteligência artificial marcou, nas conversas com mais de uma mensagem, quem corrigiu, repetiu ou reclamou da resposta. A marcação se repete em 93% dos casos quando refeita.": {
+  "en": "An artificial intelligence flagged, in conversations with more than one message, who corrected, repeated or complained about the answer. The flag repeats in 93% of cases when redone.",
+  "es": "Una inteligencia artificial marcó, en las conversaciones con más de un mensaje, quién corrigió, repitió o se quejó de la respuesta. La marca se repite en el 93% de los casos al rehacerla."
+ },
+ "Voltam {n} ({p} pessoas); comparação: {ref}, {r}.": {
+  "en": "{n} come back ({p} people); comparison: {ref}, {r}.",
+  "es": "Vuelven {n} ({p} personas); comparación: {ref}, {r}."
+ },
+ "Voltaram em até 7 dias, em % (a linha fina é a margem de erro):": {
+  "en": "Came back within 7 days, in % (the thin line is the margin of error):",
+  "es": "Volvieron en 7 días o menos, en % (la línea fina es el margen de error):"
+ },
+ "Voltaram: {n}": {
+  "en": "Came back: {n}",
+  "es": "Volvieron: {n}"
+ },
+ "entre {a} e {b} pontos percentuais": {
+  "en": "between {a} and {b} percentage points",
+  "es": "entre {a} y {b} puntos porcentuales"
+ },
+ "{v} pontos percentuais": {
+  "en": "{v} percentage points",
+  "es": "{v} puntos porcentuales"
+ },
+ "Aparelho": {
+  "en": "Device",
+  "es": "Dispositivo"
+ },
+ "Barra listrada: a diferença no retorno vista comparando todo mundo. Barra cheia: o que continua comparando pessoas parecidas, ou seja, o peso do próprio fator. Quando a listrada passa da cheia, essa sobra vinha do perfil de quem chega (seleção). Em pontos percentuais (p.p.).": {
+  "en": "Striped bar: the difference in return seen when comparing everyone. Solid bar: what remains when comparing similar people, that is, the weight of the factor itself. When the striped bar goes beyond the solid one, that extra came from the profile of who arrives (selection). In percentage points (pp).",
+  "es": "Barra rayada: la diferencia en el retorno vista comparando a todos. Barra llena: lo que se mantiene comparando personas parecidas, es decir, el peso del propio factor. Cuando la rayada pasa de la llena, ese sobrante venía del perfil de quien llega (selección). En puntos porcentuales (p.p.)."
+ },
+ "Barra listrada: diferença bruta de proporções; barra cheia: efeito marginal médio da regressão logística (o mesmo da pergunta 2). Parte que vinha do perfil = (bruto − ajustado) ÷ bruto.": {
+  "en": "Striped bar: raw difference in proportions; solid bar: average marginal effect of the logistic regression (the same as in question 2). Part that came from the profile = (raw − adjusted) ÷ raw.",
+  "es": "Barra rayada: diferencia bruta de proporciones; barra llena: efecto marginal medio de la regresión logística (el mismo de la pregunta 2). Parte que venía del perfil = (bruto − ajustado) ÷ bruto."
+ },
+ "Como a pessoa chega": {
+  "en": "How the person arrives",
+  "es": "Cómo llega la persona"
+ },
+ "Comparação simples entre grupos: ela ainda mistura o efeito de cada característica com o perfil de quem está no grupo. As perguntas 2 e 3 separam uma coisa da outra.": {
+  "en": "A simple comparison between groups: it still mixes the effect of each characteristic with the profile of who is in the group. Questions 2 and 3 separate one from the other.",
+  "es": "Comparación simple entre grupos: todavía mezcla el efecto de cada característica con el perfil de quien está en el grupo. Las preguntas 2 y 3 separan una cosa de la otra."
+ },
+ "Em outros, como a mensagem curta, a diferença vinha quase toda do perfil. Para afirmar que é causa, falta um teste A/B.": {
+  "en": "In others, such as the short message, the difference came almost entirely from the profile. To claim it is a cause, an A/B test is still needed.",
+  "es": "En otros, como el mensaje corto, la diferencia venía casi toda del perfil. Para afirmar que es causa, falta una prueba A/B."
+ },
+ "Modelo da 1ª conversa": {
+  "en": "Model of the 1st conversation",
+  "es": "Modelo de la 1.ª conversación"
+ },
+ "Nos três maiores fatores, a diferença continua praticamente igual comparando pessoas parecidas: ela não vem do perfil de quem chega.": {
+  "en": "In the three largest factors, the difference stays practically the same when comparing similar people: it does not come from the profile of who arrives.",
+  "es": "En los tres mayores factores, la diferencia se mantiene prácticamente igual comparando personas parecidas: no viene del perfil de quien llega."
+ },
+ "O que faz uma pessoa que experimentou o assistente voltar em até 7 dias?": {
+  "en": "What makes a person who tried the assistant come back within 7 days?",
+  "es": "¿Qué hace que una persona que probó el asistente vuelva en 7 días o menos?"
+ },
+ "Os maiores efeitos: {lista}. Usar GPT-4 não tem efeito comprovado.": {
+  "en": "The largest effects: {lista}. Using GPT-4 has no proven effect.",
+  "es": "Los mayores efectos: {lista}. Usar GPT-4 no tiene efecto comprobado."
+ },
+ "Para cada grupo, contamos quantas pessoas usaram o assistente pela primeira vez e quantas voltaram em outro dia, em até 7 dias.": {
+  "en": "For each group, we count how many people used the assistant for the first time and how many came back on another day, within 7 days.",
+  "es": "Para cada grupo, contamos cuántas personas usaron el asistente por primera vez y cuántas volvieron otro día, en 7 días o menos."
+ },
+ "Quais fatores têm o maior efeito no retorno?": {
+  "en": "Which factors have the largest effect on return?",
+  "es": "¿Qué factores tienen el mayor efecto en el retorno?"
+ },
+ "Quanto pesa cada um e quanto disso é causa e não seleção?": {
+  "en": "How much does each one weigh, and how much of it is cause and not selection?",
+  "es": "¿Cuánto pesa cada uno y cuánto de eso es causa y no selección?"
+ },
+ "Retorno = pessoas com uso entre D+1 e D+7 ÷ pessoas novas do grupo; margem de erro = intervalo de confiança de 95% de Wilson, calculado no banco.": {
+  "en": "Return = people with use between D+1 and D+7 ÷ new people in the group; margin of error = Wilson 95% confidence interval, calculated in the database.",
+  "es": "Retorno = personas con uso entre D+1 y D+7 ÷ personas nuevas del grupo; margen de error = intervalo de confianza de 95% de Wilson, calculado en la base de datos."
+ },
+ "Veja em cada fator quanto da diferença continua comparando pessoas parecidas.": {
+  "en": "See, for each factor, how much of the difference remains when comparing similar people.",
+  "es": "Mira, en cada factor, cuánto de la diferencia se mantiene comparando personas parecidas."
+ },
+ "Volta mais quem chega com um pedido real ({a}) e quem usa pelo computador ({b}). Quem chega só testando ({c}) ou pedindo imagem ({d}) quase não volta. O modelo quase não muda o retorno: GPT-4 {e} e GPT-3.5 {f}.": {
+  "en": "People who arrive with a real request ({a}) and who use a computer ({b}) come back more. People who arrive just testing ({c}) or asking for an image ({d}) hardly come back. The model barely changes the return: GPT-4 {e} and GPT-3.5 {f}.",
+  "es": "Vuelve más quien llega con un pedido real ({a}) y quien usa la computadora ({b}). Quien llega solo probando ({c}) o pidiendo imagen ({d}) casi no vuelve. El modelo casi no cambia el retorno: GPT-4 {e} y GPT-3.5 {f}."
+ },
+ "a linha fina é a margem de erro": {
+  "en": "the thin line is the margin of error",
+  "es": "la línea fina es el margen de error"
+ },
+ "comparando pessoas parecidas (peso do fator)": {
+  "en": "comparing similar people (weight of the factor)",
+  "es": "comparando personas parecidas (peso del factor)"
+ },
+ "média de todos ({n})": {
+  "en": "average of everyone ({n})",
+  "es": "promedio de todos ({n})"
+ },
+ "retorno de cada grupo": {
+  "en": "return of each group",
+  "es": "retorno de cada grupo"
  }
 }

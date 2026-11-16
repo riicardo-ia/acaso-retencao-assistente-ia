@@ -105,6 +105,6 @@ Se a escolha do GPT-4 fosse seleção de gente mais engajada, o efeito seria mai
 |---|---|---|
 | Comparar quem voltou e quem não voltou pela 1ª experiência | Identificar a pessoa (só o IP; mesma pessoa em 2 redes vira 2) | **ID de usuário** (login ou cookie) |
 | Medir efeitos associados com incerteza e ajuste de confusão observada | Provar causa sem experimento | **Testes A/B** de onboarding e de resposta a pedido de imagem |
-| Classificar temas e sinais de insatisfação a partir do texto | Saber se a pessoa ficou satisfeita | **Avaliação da resposta pelo usuário** (👍/👎) |
+| Classificar temas e sinais de insatisfação a partir do texto | Saber se a pessoa ficou satisfeita | **Avaliação da resposta pelo usuário** (gostei ou não gostei) |
 | Ver o horário de cada resposta | Ver o horário de cada pergunta (só o assistente tem horário) | Horário das mensagens do usuário |
 | Medir retorno de quem ficou na base | Ver conversas tóxicas (removidas da base pública) | A base completa |

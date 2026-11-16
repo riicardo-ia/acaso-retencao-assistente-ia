@@ -268,6 +268,9 @@ async def registrar(request: Request, chamar):  # type: ignore[no-untyped-def]
     resposta = await chamar(request)
     ms = (time.perf_counter() - inicio) * 1000
     resposta.headers["x-request-id"] = rid
+    if not request.url.path.startswith("/api/"):
+        # tela e arquivos estáticos: o navegador sempre confere se há versão nova (ETag)
+        resposta.headers["cache-control"] = "no-cache"
     resposta.headers["server-timing"] = f"app;dur={ms:.0f}"
     log.info(
         '{"request_id": "%s", "rota": "%s", "params": "%s", "status": %d, "duracao_ms": %.0f}',

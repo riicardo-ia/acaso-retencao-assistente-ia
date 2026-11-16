@@ -1,4 +1,4 @@
-# ADR-003 · Tema das conversas: classificação fechada por LLM, troca OpenAI ↔ Bedrock e rótulos versionados
+# ADR-003 · Tema das conversas: classificação fechada por LLM, troca entre OpenAI e Bedrock e rótulos versionados
 
 **Status:** aceito
 

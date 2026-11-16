@@ -73,6 +73,7 @@
 | IN-2.2-04 | Rodar localmente e descrever como seria a implantação | Seção de implantação | P1 | E7 | feito · DOCUMENTO §4 |
 | IN-2.2-05 | Dados pessoais: o que o dashboard mostra e o que nunca mostra | Seção e regra no código | P0 | E5/E7 | feito · DOCUMENTO §3, BDR-003 |
 | IN-2.2-06 | *(extra)* Troca de provedor de LLM por configuração (OpenAI ou Bedrock) | `LLM_PRIMARY_PROVIDER` e `LLM_PRIMARY_MODEL` | P1 | E4 | feito · ADR-003 |
+| IN-2.2-07 | *(extra)* Amostra mínima garantida na API: nenhum número de grupo com menos de 30 pessoas sai do backend | `protegido()` e testes | P0 | E6 | feito |
 
 ### B2 · §3 O que entregar
 
@@ -101,6 +102,10 @@
 | IN-3.3-10 | *(extra)* Quem lê consegue conferir: n, margem de erro, método, SQL, sensibilidade, bruto × ajustado | Recursos nas telas | P0 | E6 | feito |
 | IN-3.3-11 | *(extra)* Duas telas: A resposta (fixa, abre primeiro) e Explorar (5 filtros principais, frases por regra) | BDR-003 e telas | P0 | E6 | feito · filtros validados contra o banco |
 | IN-3.3-12 | *(extra)* Layout responsivo, identidade visual da Acaso, gráficos comuns e linguagem simples | Telas | P1 | E6 | feito |
+| IN-3.3-13 | *(extra)* As três perguntas do cliente respondidas no topo, uma por bloco: o que faz voltar (retorno por grupo), quais fatores (efeitos com margem de erro) e quanto é causa e não seleção (bruto × ajustado) | Tela A resposta | P0 | E6 | feito |
+| IN-3.3-14 | *(extra)* Retorno semana a semana com a faixa do acaso e a semana analisada em destaque | Tela A resposta | P1 | E6 | feito |
+| IN-3.3-15 | *(extra)* Telas em português, inglês e espanhol, com teste que impede frase sem tradução | Seletor no topo e `i18n.json` | P1 | E6 | feito · `tests/test_traducoes.py` |
+| IN-3.3-16 | *(extra)* Documentação dentro do dashboard (decisões, análise, indicadores, arquitetura) | Página Documentação | P1 | E6 | feito |
 
 ### B4 · §1 Usuário final
 
@@ -123,6 +128,8 @@
 | SU-4.1-02 | Como perceber que um número divergiu antes do cliente | Reconciliação que bloqueia a publicação | P1 | E5/E7 | feito |
 | SU-4.1-03 | Testes que impedem a definição de um indicador de mudar sem ninguém perceber | Testes de definição, API e integração | P0 | E3/E5 | feito · 45 testes e 6 de integração |
 | SU-4.1-04 | Como uma mudança chega à produção: ambientes, migrações e deploy | Seção no documento | P1 | E7 | feito · DOCUMENTO §5 |
+| SU-4.1-05 | *(extra)* CI a cada push e testes estruturais (definição do retorno congelada, migração nunca editada, app só lê o `mart`) | `.github/workflows/ci.yml` | P0 | E5 | feito |
+| SU-4.1-06 | *(extra)* Rastreabilidade completa por chaves (`carga_id`, `turn_identifier`, falha registrada, `request_id` na tela) | Desenho no DOCUMENTO §5 | P2 | E7 | próximo passo |
 
 ### C2 · §4.2 Investigação de um incidente
 
@@ -151,13 +158,13 @@
 |---|---|---|---|---|---|
 | DO-5-01 | Quais ferramentas de IA foram usadas e para quê | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §7 |
 | DO-5-02 | O que foi conferido, corrigido ou descartado | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §7 |
-| DO-5-03 | Horas dedicadas | Parágrafo no documento | P1 | E7 | em andamento |
+| DO-5-03 | Horas dedicadas | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §7 |
 
 ### D2 · Forma da entrega
 
 | ID | Requisito | Evidência | Prior. | Etapa | Status |
 |---|---|---|---|---|---|
-| DO-0-01 | Análise executada, dashboard funcionando e documento curto | Os três presentes | P0 | E8 | em andamento · falta o envio |
+| DO-0-01 | Análise executada, dashboard funcionando e documento curto | Os três presentes | P0 | E8 | feito · clone limpo testado do zero |
 | DO-0-02 | Decisões claras e justificadas, não documento longo | Documento curto com links para o detalhe | P1 | E7 | feito |
 | DO-0-03 | Envio no prazo do enunciado, para os dois e-mails indicados | E-mail com o link do repositório | P0 | E8 | a fazer |
 | DO-0-04 | Apresentação: 20 min de construção e 40 min de entrevista | Roteiro, depois da entrega | P2 | depois | a fazer |

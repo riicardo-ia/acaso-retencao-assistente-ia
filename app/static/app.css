@@ -43,7 +43,11 @@ h2 { font-size: 16px; margin: 0 0 4px; }
 .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .g21 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
-.g13 { grid-template-columns: minmax(240px, 1fr) minmax(0, 2.6fr); align-items: start; }
+.g13 { grid-template-columns: minmax(240px, 1fr) minmax(0, 2.6fr); }
+/* coluna de três números ao lado do gráfico: acompanham a altura dele, sem vazio embaixo */
+.pilha { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pilha > .kpi { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.pilha > .kpi .det + .det { margin-top: 10px; }
 @media (max-width: 1180px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3, .g21, .g13 { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .g4, .g2 { grid-template-columns: minmax(0, 1fr); } .marca .produto { display: none; } .filtros { position: static; } .filtros select, .filtros input { min-width: 0; width: 100%; } .filtros label { flex: 1 1 140px; } }
 .cartao { background: var(--cartao); border: 1px solid var(--linha); border-radius: var(--raio); box-shadow: var(--sombra); padding: 18px; min-width: 0; }
@@ -56,9 +60,6 @@ h2 { font-size: 16px; margin: 0 0 4px; }
 .frases h2 { color: var(--marca-escura); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
 .frases ul { margin: 6px 0 0; padding-left: 18px; } .frases li { margin: 3px 0; }
 .frases .nota { font-size: 12px; color: var(--suave); margin: 8px 0 0; }
-.selo { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-.selo.bom { background: var(--bom-fundo); color: var(--bom); } .selo.ruim { background: var(--ruim-fundo); color: var(--ruim); }
-.selo.neutro { background: var(--fundo); color: var(--suave); border: 1px solid var(--linha); } .selo.atencao { background: var(--atencao-fundo); color: var(--atencao); }
 .achado { border-left: 4px solid var(--marca); padding-left: 14px; }
 .achado .grande { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin: 4px 0; }
 .achado .decisao { background: var(--fundo); border-radius: 10px; padding: 8px 12px; margin-top: 8px; font-size: 14px; }
@@ -89,25 +90,14 @@ th { color: var(--suave); font-weight: 600; font-size: 12px; } td.num, th.num { 
 .dica { position: fixed; z-index: 5; max-width: 320px; background: var(--texto); color: #fff; padding: 9px 12px; border-radius: 10px; font-size: 13px; pointer-events: none; box-shadow: var(--sombra); }
 .estado { color: var(--suave); padding: 24px 0; } .erro { color: var(--ruim); background: var(--ruim-fundo); padding: 12px; border-radius: 10px; }
 .rodape { max-width: 1760px; margin: 0 auto; padding: 8px clamp(16px, 3vw, 40px) 32px; color: var(--suave); font-size: 12px; }
-/* Análise completa: lista de fatores e blocos */
-h3.bloco { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; margin: 4px 0 8px; }
-h3.bloco.ruim { color: var(--ruim); } h3.bloco.bom { color: var(--bom); } h3.bloco.atencao { color: var(--atencao); } h3.bloco.neutro { color: var(--suave); }
-.fatores { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-.fator { display: grid; grid-template-columns: minmax(130px, 1.2fr) minmax(80px, 1fr) minmax(150px, 1fr); gap: 12px; align-items: center; padding: 6px 8px; border-radius: 10px; cursor: default; }
-.fator:hover, .fator:focus-visible { background: var(--fundo); outline: none; }
-.fator .nome { font-weight: 500; } .fator .barra { background: var(--fundo); border-radius: 6px; height: 14px; overflow: hidden; }
-.fator .barra i { display: block; height: 100%; border-radius: 6px; } .fator .valor small { color: var(--suave); }
-.chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.chips li { background: var(--fundo); border: 1px solid var(--linha); border-radius: 999px; padding: 5px 12px; font-size: 13px; }
+/* A resposta: barras "de cada 100" e tabelas */
 .grande-frase { font-size: 20px; margin: 4px 0 10px; }
 tr.ref td { font-weight: 600; background: var(--marca-fundo); }
-.b100 { display: grid; grid-template-columns: minmax(110px, max-content) 1fr 34px; gap: 8px 12px; align-items: center; margin: 4px 0 12px; }
+.b100 { display: grid; grid-template-columns: minmax(110px, max-content) 1fr 58px; gap: 8px 12px; align-items: center; margin: 4px 0 12px; }
 .b100 .nome { font-size: 14px; text-align: right; } .b100 b { font-size: 17px; }
 .b100 .barra { position: relative; background: var(--fundo); border-radius: 6px; height: 20px; overflow: hidden; } .b100 .barra i { display: block; height: 100%; border-radius: 6px; }
 .b100 .barra s { position: absolute; top: 9px; height: 2px; background: var(--texto); opacity: .5; text-decoration: none; }
 @media (max-width: 760px) {
-  .fator { grid-template-columns: 1fr auto; grid-template-areas: "nome valor" "barra barra"; gap: 4px 10px; }
-  .fator .nome { grid-area: nome; } .fator .valor { grid-area: valor; text-align: right; } .fator .barra { grid-area: barra; }
   .b100 .nome { text-align: left; }
 }
 details .tecnico ul { margin: 6px 0 0; padding-left: 18px; } details .tecnico li { margin: 4px 0; }
@@ -115,10 +105,6 @@ details .tecnico ul { margin: 6px 0 0; padding-left: 18px; } details .tecnico li
 /* A resposta */
 h2.secao { font-size: 18px; margin: 8px 0 10px; }
 .achado-nota { background: var(--atencao-fundo); color: var(--texto); border-radius: 10px; padding: 8px 12px; font-size: 14px; margin: 10px 0 0; }
-.resumo-resposta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 22px; background: var(--cartao); border: 1px solid var(--linha); border-left: 4px solid var(--marca); border-radius: var(--raio); padding: 12px 18px; margin-bottom: 16px; }
-.resumo-resposta .titulo span { color: var(--suave); font-size: 13px; }
-.resumo-resposta ul { margin: 0; padding-left: 18px; flex: 1 1 520px; } .resumo-resposta li { margin: 2px 0; }
-.resumo-resposta a { color: var(--marca); font-weight: 600; white-space: nowrap; }
 
 /* Documentação */
 .docs { display: grid; grid-template-columns: minmax(200px, 270px) minmax(0, 1fr); gap: 16px; align-items: start; }
@@ -139,6 +125,12 @@ h2.secao { font-size: 18px; margin: 8px 0 10px; }
 
 /* idioma da tela */
 .linguas { display: flex; gap: 2px; border: 1px solid var(--linha); border-radius: 999px; padding: 2px; }
+.linguas[hidden] { display: none; }
 .linguas button { font: inherit; font-size: 12px; font-weight: 600; border: 0; background: none; color: var(--suave); padding: 5px 9px; border-radius: 999px; cursor: pointer; }
 .linguas button[aria-pressed="true"] { background: var(--texto); color: #fff; }
 .topo nav { margin-left: auto; }
+
+/* A resposta: um bloco por pergunta do cliente */
+.bloco-pergunta h2 { display: flex; align-items: center; gap: 10px; font-size: 18px; margin-bottom: 6px; }
+.bloco-pergunta h2 .num { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--marca); color: #fff; font-size: 14px; }
+.resposta-curta { font-size: 15px; margin: 0 0 10px; padding: 8px 12px; background: var(--marca-fundo); border-radius: 10px; }
