@@ -1,12 +1,13 @@
 """Definições de negócio: sessão, primeira experiência, retorno e elegibilidade da coorte.
 
-Estes testes travam a definição do indicador principal (SU-4.1-03): se alguém
-mudar a regra de sessão ou de janela, um teste quebra.
+Estes testes travam a definição do indicador principal: se alguém mudar a regra de
+quem é a pessoa, de sessão ou de janela, um teste quebra.
 """
 
 import pandas as pd
 
 from analise.definicoes import elegiveis, retorno_por_dia, retorno_por_sessao, unir_ips
+from etl.carga import pessoas
 
 T0 = pd.Timestamp("2023-06-01 12:00", tz="UTC")
 
@@ -147,3 +148,17 @@ def test_dia_primeira_experiencia_e_o_primeiro_dia_inteiro() -> None:
     assert r["inicio"] == T0
     assert r["fim_exp1"] == T0 + pd.Timedelta(hours=5)
     assert r["dias_ativos"] == 2
+
+
+def test_mesmo_ip_com_navegadores_diferentes_e_a_mesma_pessoa() -> None:
+    """Somar o user-agent à chave dividiria a mesma pessoa em várias (incidente §4.2)."""
+    conv = pd.DataFrame(
+        {
+            "ip": ["ip-a", "ip-a", "ip-a", "ip-b"],
+            "ua": ["Chrome 118", "Chrome 119", "Safari iPhone", "Chrome 119"],
+        }
+    )
+    p = pessoas(conv, sal="sal-de-teste")
+    assert p.iloc[0] == p.iloc[1] == p.iloc[2]
+    assert p.iloc[3] != p.iloc[0]
+    assert "ip-a" not in p.iloc[0]  # o pseudônimo não revela o IP

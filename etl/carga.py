@@ -46,6 +46,15 @@ def usuario_id(ip: str, sal: str) -> str:
     return hashlib.sha256((sal + ip).encode()).hexdigest()[:20]
 
 
+def pessoas(conv: pd.DataFrame, sal: str) -> pd.Series:
+    """Quem é a pessoa de cada conversa: o IP pseudonimizado (BDR-001).
+
+    O user-agent fica de fora de propósito: ele muda com o navegador ou o aparelho, e
+    somá-lo à chave transforma a mesma pessoa em várias (a falha do incidente §4.2).
+    """
+    return conv["ip"].map(lambda ip: usuario_id(ip, sal))
+
+
 def montar(sal: str) -> dict[str, pd.DataFrame]:
     conv = conversas_detalhadas(str(BRUTO)).merge(
         pd.read_csv(TEMAS_SEED)[["conv_id", "tema", "insatisfacao"]],
@@ -56,7 +65,7 @@ def montar(sal: str) -> dict[str, pd.DataFrame]:
     conv["insatisfacao"] = conv["insatisfacao"].fillna("nao_avaliavel")
     uas = conv.groupby("ip")["ua"].nunique()
     conv["ip_anomalo"] = conv["ip"].map(uas >= 10)
-    conv["usuario_id"] = conv["ip"].map(lambda ip: usuario_id(ip, sal))
+    conv["usuario_id"] = pessoas(conv, sal)
     ev = base.eventos(str(BRUTO)).merge(conv[["conv_id", "usuario_id"]], on="conv_id")
 
     mart_conv = pd.DataFrame(
