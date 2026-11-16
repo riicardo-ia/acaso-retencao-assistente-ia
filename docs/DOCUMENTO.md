@@ -48,6 +48,8 @@ Sobe com `docker compose up --build` e abre em `http://localhost:8000`. É um **
 | **A resposta** (abre primeiro; fixa, base inteira) | O que faz voltar, quanto pesa cada fator e quanto disso vinha do perfil de quem chega? | Tudo em **"de cada 100 pessoas"**. No topo, o número principal com a margem de erro; **"o que mais pesa"**: ponto e linha por fator (o efeito e a margem de erro, ordenados pelo tamanho; a linha que cruza o zero mostra na hora o que não faz diferença); **"quanto vinha do perfil"**: dois pontos por fator, a diferença comparando todo mundo e a que sobra comparando pessoas parecidas (a distância entre eles é a seleção). Depois, os 3 achados em **barras com margem de erro** e "o que fazer"; GPT-4 por três formas de medir; a semana de 20/11 em barras e na tabela perfil × retorno; **retorno semana a semana** com a faixa do acaso (separa variação real de sorte); mediadores, insatisfação, sensibilidade às regras e como os temas foram classificados. Termos técnicos (IC, regressão, IPW, pseudo-R²) só no detalhe técnico |
 | **Explorar** (com filtros: período do 1º uso, idioma, dispositivo, tema da 1ª conversa, modelo) | Neste recorte, quantos voltam, como isso evoluiu e quem volta mais? | Números principais; **linha** do retorno mês a mês com a margem de erro sombreada (tendência); **colunas** de pessoas novas por mês (volume); **barras horizontais** por idioma, dispositivo, modelo e tema (comparar grupos); barras lado a lado "% das pessoas × % das conversas" por tema (peso de quem usa muito). Frases por regra que mudam com o filtro. No topo, uma faixa-resumo da resposta, que não muda com os filtros |
 
+**Documentação.** Um terceiro link no topo abre, dentro do próprio dashboard, os documentos do repositório: este documento, os BDRs e ADRs, a análise passo a passo, os indicadores e o incidente. Só são servidos os arquivos de uma lista fechada, convertidos de Markdown no servidor.
+
 **Linguagem.** "De cada 100 pessoas", "margem de erro", "mesmo considerando idioma, aparelho, horário, tema e época", "pode ser acaso", "não faz diferença comprovada". Cada gráfico tem "Como calculamos?" com uma explicação simples e o detalhe técnico recolhível, mais a consulta SQL.
 
 **Frases automáticas (Explorar).** São regras fixas, sem LLM (`app/insights.py`, testadas):
@@ -78,15 +80,7 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 
 ## 4. Arquitetura
 
-```mermaid
-flowchart LR
-    HF[(WildChat-1M<br/>HuggingFace)] -->|extração: 14 parquets, filtro Brasil| RAW[(Base bruta<br/>parquet · S3)]
-    RAW --> ETL[Carga · Python<br/>definições + análise + temas versionados]
-    SEED[(Rótulos de tema<br/>seed · Bedrock em produção)] --> ETL
-    ETL -->|COPY + reconciliação SQL = Python| MART[(Postgres · schema mart<br/>RDS)]
-    MART -->|papel bi_app: só leitura| API[API FastAPI<br/>ECS Fargate]
-    API --> WEB[Telas HTML/JS/SVG<br/>S3 + CloudFront]
-```
+![Fluxo da base bruta até a tela](img/arquitetura.svg)
 
 | Componente local | Na AWS | Por quê |
 |---|---|---|
@@ -118,6 +112,8 @@ flowchart LR
 |---|---|---|
 | `GET /api/explorar` | `inicio`, `fim` (AAAA-MM-DD) e `idioma`, `dispositivo`, `tema`, `modelo` (opcionais; valor fora da lista → 400) | recorte e base com margem de erro, série mensal, retorno por grupo nas 4 dimensões, chegada por tema, frases, opções dos filtros, procedência, SQL |
 | `GET /api/analise` | — | retorno geral e por semana, efeitos bruto e ajustado com IC, GPT-4 por três métodos, decomposição da semana, sensibilidade, testes, procedência, SQL |
+| `GET /api/documentos` | — | índice da Documentação: nome, grupo e título de cada documento |
+| `GET /api/documentos/{nome}` | nome de um documento da lista (fora dela → 404) | título e HTML do documento, com os links internos apontando para a própria página |
 | `GET /healthz` | — | `{"status": "ok"}` |
 
 Documentação interativa em `/api/docs`.

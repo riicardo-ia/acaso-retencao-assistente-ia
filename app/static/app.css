@@ -119,3 +119,20 @@ h2.secao { font-size: 18px; margin: 8px 0 10px; }
 .resumo-resposta .titulo span { color: var(--suave); font-size: 13px; }
 .resumo-resposta ul { margin: 0; padding-left: 18px; flex: 1 1 520px; } .resumo-resposta li { margin: 2px 0; }
 .resumo-resposta a { color: var(--marca); font-weight: 600; white-space: nowrap; }
+
+/* Documentação */
+.docs { display: grid; grid-template-columns: minmax(200px, 270px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .docs { grid-template-columns: minmax(0, 1fr); } }
+.docs-indice { position: sticky; top: 76px; font-size: 14px; }
+.docs-indice h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--suave); margin: 14px 0 6px; }
+.docs-indice ul { list-style: none; padding: 0; margin: 0; }
+.docs-indice a { display: block; color: var(--texto); text-decoration: none; padding: 5px 10px; border-radius: 8px; }
+.docs-indice a:hover { background: var(--cartao); } .docs-indice a[aria-current="page"] { background: var(--marca); color: #fff; }
+.doc { padding: 22px 28px; font-size: 15px; overflow-wrap: anywhere; }
+.doc h1 { font-size: 24px; } .doc h2 { font-size: 19px; margin: 26px 0 8px; } .doc h3 { font-size: 16px; margin: 18px 0 6px; }
+.doc table { display: block; overflow-x: auto; margin: 10px 0 16px; font-size: 13px; }
+.doc img { max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid var(--linha); border-radius: 10px; }
+.doc code { background: var(--fundo); border-radius: 5px; padding: 1px 5px; font-size: 13px; }
+.doc pre code { background: none; padding: 0; }
+.doc blockquote { margin: 10px 0; padding: 6px 14px; border-left: 4px solid var(--marca-clara); background: var(--fundo); border-radius: 0 10px 10px 0; }
+.doc a { color: var(--marca); }

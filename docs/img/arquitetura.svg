@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 270" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" role="img" aria-label="Fluxo da base bruta até a tela">
+  <title>Arquitetura: da base bruta até a tela</title>
+  <defs>
+    <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#6b7280"/></marker>
+  </defs>
+  <rect width="1060" height="270" fill="#ffffff"/>
+  <rect x="560" y="92" width="490" height="118" rx="14" fill="none" stroke="#6a48eb" stroke-dasharray="6 5"/>
+  <text x="805" y="230" text-anchor="middle" fill="#583ecb">o dashboard só enxerga a base analítica (nunca a base bruta)</text>
+
+  <g fill="#f6f7f9" stroke="#a1a1aa">
+    <rect x="10" y="110" width="130" height="80" rx="10"/>
+    <rect x="185" y="110" width="140" height="80" rx="10"/>
+    <rect x="370" y="110" width="170" height="80" rx="10"/>
+    <rect x="390" y="10" width="130" height="58" rx="10"/>
+  </g>
+  <g fill="#efebfd" stroke="#6a48eb">
+    <rect x="575" y="110" width="150" height="80" rx="10"/>
+    <rect x="765" y="110" width="125" height="80" rx="10"/>
+    <rect x="915" y="110" width="125" height="80" rx="10"/>
+  </g>
+
+  <g fill="#121212" text-anchor="middle">
+    <text x="75" y="140" font-weight="600">WildChat-1M</text><text x="75" y="158">HuggingFace</text><text x="75" y="176" fill="#6b7280">14 parquets</text>
+    <text x="255" y="140" font-weight="600">Base bruta</text><text x="255" y="158">parquet, só Brasil</text><text x="255" y="176" fill="#6b7280">S3</text>
+    <text x="455" y="136" font-weight="600">Carga (Python)</text><text x="455" y="154">definições, análise e temas</text><text x="455" y="176" fill="#6b7280">ECS Fargate + EventBridge</text>
+    <text x="455" y="33" font-weight="600">Rótulos de tema</text><text x="455" y="53" fill="#6b7280">seed · Bedrock</text>
+    <text x="650" y="136" font-weight="600">Base analítica</text><text x="650" y="154">Postgres, schema mart</text><text x="650" y="176" fill="#6b7280">RDS</text>
+    <text x="827" y="140" font-weight="600">API FastAPI</text><text x="827" y="158">só leitura</text><text x="827" y="176" fill="#6b7280">ECS Fargate</text>
+    <text x="977" y="140" font-weight="600">Telas</text><text x="977" y="158">HTML, JS e SVG</text><text x="977" y="176" fill="#6b7280">S3 + CloudFront</text>
+  </g>
+
+  <g stroke="#6b7280" stroke-width="1.5" marker-end="url(#seta)">
+    <line x1="140" y1="150" x2="183" y2="150"/>
+    <line x1="325" y1="150" x2="368" y2="150"/>
+    <line x1="455" y1="68" x2="455" y2="108"/>
+    <line x1="540" y1="150" x2="573" y2="150"/>
+    <line x1="725" y1="150" x2="763" y2="150"/>
+    <line x1="890" y1="150" x2="913" y2="150"/>
+  </g>
+  <g fill="#6b7280" font-size="11.5" text-anchor="middle">
+    <text x="162" y="100">extração</text><text x="162" y="214">filtro do Brasil</text>
+    <text x="557" y="80">COPY</text>
+    <text x="465" y="214">reconciliação SQL = Python:</text><text x="465" y="230">se divergir, não publica</text>
+    <text x="745" y="66">papel bi_app</text><text x="745" y="80">só SELECT</text>
+  </g>
+</svg>

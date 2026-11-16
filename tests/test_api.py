@@ -282,3 +282,33 @@ def test_resposta_traz_achados_com_margem_e_faixa_do_acaso(cliente: TestClient) 
     pequeno = next(a for a in d["achados"] if a["grupo"] == "burlar_regras")
     assert pequeno["retorno_pct"] is None
     assert "acaso_lo" in d["sql"]["coortes"] and "mart.wilson" in d["sql"]["achados"]
+
+
+# Documentação: só os arquivos da lista fechada; links internos abrem na própria página.
+
+
+def test_documentacao_lista_decisoes_e_analise(cliente: TestClient) -> None:
+    nomes = {d["nome"] for d in cliente.get("/api/documentos").json()}
+    assert {"documento", "bdr-001", "adr-002", "eda", "incidente"} <= nomes
+
+
+def test_documento_vira_html_com_links_internos(cliente: TestClient) -> None:
+    d = cliente.get("/api/documentos/documento").json()
+    assert "<table>" in d["html"]
+    assert 'href="#documentacao/bdr-001"' in d["html"]
+    assert 'src="/documentacao/arquivos/img/arquitetura.svg"' in d["html"]
+    eda = cliente.get("/api/documentos/eda").json()["html"]
+    assert 'src="/documentacao/arquivos/analise/img/01-uso-no-tempo.png"' in eda
+
+
+@pytest.mark.parametrize(
+    "caminho",
+    ["inexistente", "..%2F..%2Fetc%2Fpasswd", "DOCUMENTO.md", "%2E%2E%2F.env"],
+)
+def test_documento_fora_da_lista_e_404(cliente: TestClient, caminho: str) -> None:
+    assert cliente.get(f"/api/documentos/{caminho}").status_code == 404
+
+
+def test_imagem_da_documentacao_e_servida(cliente: TestClient) -> None:
+    r = cliente.get("/documentacao/arquivos/img/arquitetura.svg")
+    assert r.status_code == 200 and r.content.startswith(b"<svg")

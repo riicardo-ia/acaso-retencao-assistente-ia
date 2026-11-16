@@ -529,9 +529,28 @@ async function paginaResposta(el) {
   return d.procedencia;
 }
 
-const PAGINAS = { resposta: paginaResposta, explorar: paginaExplorar };
+// ---------- Documentação: os documentos do repositório, sem sair do dashboard ----------
+async function paginaDocumentacao(el, _qs, nome) {
+  $("#filtros").hidden = true;
+  const lista = await api("/api/documentos");
+  const atual = lista.some((x) => x.nome === nome) ? nome : lista[0].nome;
+  const doc = await api(`/api/documentos/${encodeURIComponent(atual)}`);
+  const grupos = [...new Set(lista.map((x) => x.grupo))];
+  el.innerHTML = `
+    <h1>Documentação</h1>
+    <p class="pergunta">As decisões, a análise passo a passo, os indicadores e a arquitetura, como estão no repositório.</p>
+    <div class="docs">
+      <aside class="docs-indice" aria-label="Documentos">${grupos.map((g) => `<h3>${esc(g)}</h3><ul>${lista.filter((x) => x.grupo === g).map((x) => `<li><a href="#documentacao/${x.nome}" ${x.nome === atual ? 'aria-current="page"' : ""}>${esc(x.titulo)}</a></li>`).join("")}</ul>`).join("")}</aside>
+      <article class="cartao doc">${doc.html}</article>
+    </div>`;
+  window.scrollTo(0, 0);
+  return null;
+}
+
+const PAGINAS = { resposta: paginaResposta, explorar: paginaExplorar, documentacao: paginaDocumentacao };
 
 function rodape(p) {
+  if (!p) { $("#rodape").innerHTML = ""; return; }
   $("#rodape").innerHTML = `<b>Fonte:</b> ${esc(p.fonte)} · ${N(p.linhas_brasil)} conversas do Brasil, de ${N(p.linhas_fonte)} na base ·
     <b>Atualizado em</b> ${new Date(p.carga_em).toLocaleString("pt-BR")} (versão ${esc(p.versao_codigo)}) ·
     ${p.reconciliacao_ok ? "números conferidos contra a base bruta ✓" : "<b>ATENÇÃO: a conferência contra a base bruta falhou</b>"}<br>
@@ -539,14 +558,15 @@ function rodape(p) {
 }
 
 async function mostrar() {
-  const [bruta, qs] = (location.hash.slice(1) || "resposta").split("?");
+  const [caminho, qs] = (location.hash.slice(1) || "resposta").split("?");
+  const [bruta, sub] = caminho.split("/");
   const aba = bruta === "analise" ? "resposta" : bruta;  // endereço antigo da tela
   const pagina = PAGINAS[aba] ? aba : "resposta";
   document.querySelectorAll("nav a").forEach((a) => (a.dataset.aba === pagina ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
   const el = $("#conteudo");
   el.innerHTML = `<p class="estado">Carregando…</p>`;
   try {
-    rodape(await PAGINAS[pagina](el, new URLSearchParams(qs || "")));
+    rodape(await PAGINAS[pagina](el, new URLSearchParams(qs || ""), sub));
     ligarDicas(el);
   } catch (e) {
     el.innerHTML = `<p class="erro">${esc(e.message)}</p>`;

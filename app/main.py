@@ -17,6 +17,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+import markdown
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -27,6 +28,70 @@ from app import insights
 
 N_MIN = insights.N_MIN
 ESTATICO = Path(__file__).parent / "static"
+DOCS = Path(__file__).parents[1] / "docs"
+REPOSITORIO = "https://github.com/riicardo-ia/acaso-retencao-assistente-ia"
+# Lista fechada: só estes arquivos são servidos na página Documentação (nome -> grupo, título, arquivo).
+DOCUMENTOS: dict[str, tuple[str, str, str]] = {
+    "documento": ("Resumo", "Documento final", "DOCUMENTO.md"),
+    "indicadores": ("Resumo", "Indicadores", "indicadores.md"),
+    "incidente": ("Resumo", "Incidente §4.2", "incidente-4.2.md"),
+    "bdr-001": (
+        "Decisões de negócio (BDR)",
+        "BDR-001 · Definições de uso e retorno",
+        "bdr/BDR-001-definicoes-de-uso-e-retorno.md",
+    ),
+    "bdr-002": (
+        "Decisões de negócio (BDR)",
+        "BDR-002 · Temas das conversas",
+        "bdr/BDR-002-temas-das-conversas.md",
+    ),
+    "bdr-003": (
+        "Decisões de negócio (BDR)",
+        "BDR-003 · O que o dashboard mostra",
+        "bdr/BDR-003-o-que-o-dashboard-mostra.md",
+    ),
+    "adr-001": (
+        "Decisões técnicas (ADR)",
+        "ADR-001 · Stack do dashboard",
+        "adr/ADR-001-stack-do-dashboard.md",
+    ),
+    "adr-002": (
+        "Decisões técnicas (ADR)",
+        "ADR-002 · Base analítica",
+        "adr/ADR-002-base-analitica.md",
+    ),
+    "adr-003": (
+        "Decisões técnicas (ADR)",
+        "ADR-003 · LLM para o tema",
+        "adr/ADR-003-llm-para-tema.md",
+    ),
+    "qualidade": (
+        "Análise passo a passo",
+        "1 · Qualidade dos dados",
+        "analise/01-qualidade.md",
+    ),
+    "definicoes": (
+        "Análise passo a passo",
+        "2 · Definições e sensibilidade",
+        "analise/02-definicoes.md",
+    ),
+    "variaveis": (
+        "Análise passo a passo",
+        "3 · Variáveis da 1ª experiência",
+        "analise/03-variaveis.md",
+    ),
+    "eda": ("Análise passo a passo", "4 · Análise exploratória", "analise/04-eda.md"),
+    "temas": (
+        "Análise passo a passo",
+        "5 · Temas das conversas",
+        "analise/05-temas.md",
+    ),
+    "analise": (
+        "Análise passo a passo",
+        "6 · A resposta, com os efeitos",
+        "analise/06-analise.md",
+    ),
+}
 DIMENSOES = ("idioma", "dispositivo", "tema", "modelo")
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -238,6 +303,48 @@ def _filtros(
     return params
 
 
+def _link(destino: str, pasta: Path) -> str:
+    """Link de um documento para dentro da página: outro documento da lista abre na própria
+    página; imagem vem do servidor; código e pastas abrem no repositório."""
+    if destino.startswith(("http://", "https://", "#", "mailto:")):
+        return destino
+    caminho, _, ancora = destino.partition("#")
+    alvo = (pasta / caminho).resolve()
+    raiz = DOCS.parent.resolve()
+    if not alvo.is_relative_to(raiz):
+        return "#"
+    relativo = alvo.relative_to(raiz).as_posix()
+    for nome, (_, _, arquivo) in DOCUMENTOS.items():
+        if relativo == f"docs/{arquivo}":
+            return f"#documentacao/{nome}"
+    if relativo.startswith("docs/") and alvo.suffix in {".png", ".svg"}:
+        return "/documentacao/arquivos/" + relativo.removeprefix("docs/")
+    tipo = "tree" if alvo.is_dir() or caminho.endswith("/") else "blob"
+    return f"{REPOSITORIO}/{tipo}/main/{relativo}" + (f"#{ancora}" if ancora else "")
+
+
+@app.get("/api/documentos")
+def documentos() -> list[dict[str, str]]:
+    """Índice da página Documentação."""
+    return [{"nome": n, "grupo": g, "titulo": t} for n, (g, t, _) in DOCUMENTOS.items()]
+
+
+@app.get("/api/documentos/{nome}")
+def documento(nome: str) -> dict[str, str]:
+    """Um documento da lista, convertido de Markdown para HTML no servidor."""
+    if nome not in DOCUMENTOS:
+        raise HTTPException(404, "documento não encontrado")
+    _, titulo, arquivo = DOCUMENTOS[nome]
+    caminho = DOCS / arquivo
+    html = markdown.markdown(caminho.read_text(), extensions=["tables", "fenced_code"])
+    html = re.sub(
+        r'(href|src)="([^"]+)"',
+        lambda m: f'{m[1]}="{_link(m[2], caminho.parent)}"',
+        html,
+    )
+    return {"nome": nome, "titulo": titulo, "html": html}
+
+
 @app.get("/api/explorar")
 def explorar(
     inicio: str | None = None,
@@ -346,6 +453,7 @@ def analise() -> dict[str, Any]:
 
 
 app.mount("/static", StaticFiles(directory=ESTATICO), name="static")
+app.mount("/documentacao/arquivos", StaticFiles(directory=DOCS), name="documentacao")
 
 
 @app.get("/")

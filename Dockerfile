@@ -9,5 +9,6 @@ COPY analise/ analise/
 COPY etl/ etl/
 COPY app/ app/
 COPY data/seed/ data/seed/
+COPY docs/ docs/
 RUN mkdir -p data/raw data/tmp && chown -R bi data
 USER 10001
