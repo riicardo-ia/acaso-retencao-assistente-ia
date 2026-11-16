@@ -1,0 +1,9 @@
+.venv
+.git
+data/raw
+data/tmp
+logs
+_local
+docs
+tests
+*.pdf

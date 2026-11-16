@@ -1,0 +1,54 @@
+# Sobe do zero: docker compose up --build
+#   db   Postgres (base analítica)
+#   etl  base bruta -> base analítica (roda uma vez; baixa o WildChat-1M na 1ª execução)
+#   app  API + dashboard em http://localhost:8000 (só lê o schema mart; não enxerga a base bruta)
+# As senhas padrão abaixo são só para rodar localmente; em produção vêm do Secrets Manager.
+services:
+  db:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_USER: bi_owner
+      POSTGRES_PASSWORD: ${BI_OWNER_PASSWORD:-local_owner}
+      POSTGRES_DB: bi
+      BI_ETL_PASSWORD: ${BI_ETL_PASSWORD:-local_etl}
+      BI_APP_PASSWORD: ${BI_APP_PASSWORD:-local_app}
+    ports:
+      - "127.0.0.1:55432:5432"          # só na máquina local: testes de integração e conferência
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bi_owner -d bi"]
+      interval: 3s
+      retries: 20
+
+  etl:
+    build: .
+    command: ["python", "-m", "etl.carga"]
+    environment:
+      DATABASE_URL_ETL: postgresql://bi_etl:${BI_ETL_PASSWORD:-local_etl}@db:5432/bi
+      SAL_USUARIO: ${SAL_USUARIO:-sal-local-troque-em-producao}
+      VERSAO_CODIGO: ${VERSAO_CODIGO:-local}
+    volumes:
+      - bruto:/app/data/raw             # base bruta (cache do download): só o ETL monta
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build: .
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      DATABASE_URL_APP: postgresql://bi_app:${BI_APP_PASSWORD:-local_app}@db:5432/bi
+    ports:
+      - "8000:8000"
+    depends_on:
+      etl:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 10s
+
+volumes:
+  pgdata:
+  bruto:
