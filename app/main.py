@@ -77,7 +77,7 @@ FROM recorte GROUP BY {d} ORDER BY retorno_pct DESC"""
     },
     "chegada": RECORTE
     + """
-SELECT r.tema AS categoria,
+SELECT r.tema AS categoria, count(DISTINCT r.usuario_id) AS n,
        round(100.0 * count(DISTINCT r.usuario_id) / sum(count(DISTINCT r.usuario_id)) OVER (), 1) AS pct_pessoas,
        round(100.0 * count(c.conv_id) / sum(count(c.conv_id)) OVER (), 1) AS pct_conversas
 FROM recorte r JOIN mart.conversas c ON c.usuario_id = r.usuario_id
@@ -92,7 +92,25 @@ FROM mart.vw_explorar""",
        bruto_pp, bruto_lo, bruto_hi, ajustado_pp, ajustado_lo, ajustado_hi, p
 FROM mart.efeitos""",
     "gpt4": "SELECT metodo, detalhe, dif_pp, lo, hi, n FROM mart.gpt4_selecao",
-    "semana": "SELECT * FROM mart.semana_decomposicao ORDER BY segmento, grupo",
+    "semana_total": """WITH t AS (
+    SELECT semana,
+           sum(n_antes)::bigint AS n_antes, round(sum(n_antes * retorno_antes))::bigint AS voltaram_antes,
+           sum(n_semana)::bigint AS n_semana, round(sum(n_semana * retorno_semana))::bigint AS voltaram_semana
+    FROM mart.semana_decomposicao WHERE segmento = 'chegada' GROUP BY semana
+)
+SELECT semana, n_antes, voltaram_antes,
+       round(100.0 * voltaram_antes / n_antes, 1) AS retorno_antes_pct,
+       mart.wilson(voltaram_antes, n_antes, -1) AS antes_lo, mart.wilson(voltaram_antes, n_antes, 1) AS antes_hi,
+       n_semana, voltaram_semana,
+       round(100.0 * voltaram_semana / n_semana, 1) AS retorno_semana_pct,
+       mart.wilson(voltaram_semana, n_semana, -1) AS semana_lo, mart.wilson(voltaram_semana, n_semana, 1) AS semana_hi
+FROM t""",
+    "semana_segmentos": """SELECT segmento, round(sum(mix_pp), 1) AS mix_pp, round(sum(taxa_pp), 1) AS taxa_pp
+FROM mart.semana_decomposicao GROUP BY segmento ORDER BY segmento""",
+    "semana_grupos": """SELECT segmento, grupo,
+       n_antes, round(100 * peso_antes, 1) AS peso_antes_pct, round(100 * retorno_antes, 1) AS retorno_antes_pct,
+       n_semana, round(100 * peso_semana, 1) AS peso_semana_pct, round(100 * retorno_semana, 1) AS retorno_semana_pct
+FROM mart.semana_decomposicao ORDER BY segmento, grupo""",
     "sensibilidade": "SELECT * FROM mart.sensibilidade",
     "testes": "SELECT nome, descricao, valor, lo, hi, p, n FROM mart.testes",
     "carga": """SELECT executada_em, versao_codigo, linhas_fonte, linhas_brasil, conversas,
@@ -126,6 +144,22 @@ def _em_cache(
 def dados(nome: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     chave = tuple(sorted((params or {}).items()))
     return _em_cache(nome, chave, str(consultar("carga")[0]["executada_em"]))
+
+
+def protegido(linha: dict[str, Any], n: int | None) -> dict[str, Any]:
+    """Grupo com menos de N_MIN pessoas sai sem nenhum número, nem a contagem (BDR-003).
+
+    A regra fica na API, e não só na tela: o que não sai daqui não aparece em lugar nenhum.
+    """
+    if (n or 0) >= N_MIN:
+        return {**linha, "suficiente": True}
+    return {
+        **{
+            k: None if isinstance(v, int | float) and not isinstance(v, bool) else v
+            for k, v in linha.items()
+        },
+        "suficiente": False,
+    }
 
 
 def procedencia() -> dict[str, Any]:
@@ -210,10 +244,8 @@ def explorar(
     filtrado = params != sem_filtro
     recorte = dados("resumo", params)[0]
     base = dados("resumo", sem_filtro)[0]
-    grupos = {
-        d: [{**g, "suficiente": g["n"] >= N_MIN} for g in dados(f"grupo_{d}", params)]
-        for d in DIMENSOES
-    }
+    grupos = {d: dados(f"grupo_{d}", params) for d in DIMENSOES}
+    # As frases usam as contagens completas, mas só citam grupos com N_MIN pessoas ou mais.
     frases = [insights.resumo(recorte, base, filtrado)]
     if recorte["n"] >= N_MIN:
         frases += insights.destaques(
@@ -228,12 +260,14 @@ def explorar(
         "opcoes": {
             k: sorted(v) if isinstance(v, list) else str(v) for k, v in op.items()
         },
-        "recorte": {**recorte, "suficiente": recorte["n"] >= N_MIN},
+        "recorte": protegido(recorte, recorte["n"]),
         "base": base,
-        "serie": [{**s, "suficiente": s["n"] >= N_MIN} for s in dados("serie", params)],
-        "grupos": grupos,
+        "serie": [protegido(s, s["n"]) for s in dados("serie", params)],
+        "grupos": {
+            d: [protegido(g, g["n"]) for g in linhas] for d, linhas in grupos.items()
+        },
         "rotulos": insights.ROTULOS,
-        "chegada": dados("chegada", params),
+        "chegada": [protegido(c, c["n"]) for c in dados("chegada", params)],
         "frases": frases,
         "n_min": N_MIN,
         "procedencia": procedencia(),
@@ -249,19 +283,42 @@ def explorar(
 @app.get("/api/analise")
 def analise() -> dict[str, Any]:
     """Tela Análise completa: resultados estatísticos fixos (base inteira, sem filtros)."""
+    total = dados("semana_total")
+    semana = (
+        {
+            **total[0],
+            "segmentos": dados("semana_segmentos"),
+            # um grupo só aparece com N_MIN pessoas ou mais antes E na semana
+            "grupos": [
+                protegido(g, min(g["n_antes"] or 0, g["n_semana"] or 0))
+                for g in dados("semana_grupos")
+            ],
+        }
+        if total
+        else None
+    )
     return {
         "geral": dados("geral")[0],
-        "coortes": [{**c, "suficiente": c["novos"] >= N_MIN} for c in dados("coortes")],
-        "efeitos": [{**e, "suficiente": e["n"] >= N_MIN} for e in dados("efeitos")],
+        "coortes": [protegido(c, c["novos"]) for c in dados("coortes")],
+        "efeitos": [protegido(e, e["n"]) for e in dados("efeitos")],
         "gpt4": dados("gpt4"),
-        "semana": dados("semana"),
+        "semana": semana,
         "sensibilidade": dados("sensibilidade"),
         "testes": dados("testes"),
         "n_min": N_MIN,
         "procedencia": procedencia(),
         "sql": {
             k: SQL[k]
-            for k in ("geral", "efeitos", "gpt4", "semana", "sensibilidade", "testes")
+            for k in (
+                "geral",
+                "coortes",
+                "efeitos",
+                "gpt4",
+                "semana_total",
+                "semana_segmentos",
+                "sensibilidade",
+                "testes",
+            )
         },
     }
 

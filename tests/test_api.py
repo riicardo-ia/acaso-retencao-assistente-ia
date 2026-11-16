@@ -25,7 +25,23 @@ GRUPO = [
         "ic_lo": 11.3,
         "ic_hi": 16.2,
     },
+    {
+        "categoria": "tablet",
+        "n": 12,
+        "voltaram": 1,
+        "retorno_pct": 8.3,
+        "ic_lo": 1.5,
+        "ic_hi": 35.4,
+    },
 ]
+RECORTE_PEQUENO = {
+    "n": 12,
+    "voltaram": 1,
+    "retorno_pct": 8.3,
+    "ic_lo": 1.5,
+    "ic_hi": 35.4,
+}
+NUMEROS = ("n", "voltaram", "retorno_pct", "ic_lo", "ic_hi")
 LINHAS: dict[str, list[dict[str, Any]]] = {
     "carga": [
         {
@@ -74,7 +90,10 @@ LINHAS: dict[str, list[dict[str, Any]]] = {
     "grupo_dispositivo": GRUPO,
     "grupo_tema": [],
     "grupo_modelo": [],
-    "chegada": [{"categoria": "estudo", "pct_pessoas": 17.1, "pct_conversas": 15.6}],
+    "chegada": [
+        {"categoria": "estudo", "n": 387, "pct_pessoas": 17.1, "pct_conversas": 15.6},
+        {"categoria": "outro", "n": 9, "pct_pessoas": 0.4, "pct_conversas": 0.3},
+    ],
     "geral": [
         {
             "usuarios": 2266,
@@ -94,9 +113,46 @@ LINHAS: dict[str, list[dict[str, Any]]] = {
             "ic_hi": 35.4,
         }
     ],
-    "efeitos": [{"fator": "tema", "nivel": "outro", "n": 20}],
+    "efeitos": [
+        {
+            "fator": "tema",
+            "nivel": "outro",
+            "n": 20,
+            "retorno_pct": 5.0,
+            "ajustado_pp": -3.1,
+        }
+    ],
     "gpt4": [],
-    "semana": [],
+    "semana_total": [
+        {
+            "semana": date(2023, 11, 20),
+            "n_antes": 188,
+            "voltaram_antes": 43,
+            "retorno_antes_pct": 22.9,
+            "n_semana": 64,
+            "voltaram_semana": 8,
+            "retorno_semana_pct": 12.5,
+        }
+    ],
+    "semana_segmentos": [{"segmento": "chegada", "mix_pp": -0.4, "taxa_pp": -10.0}],
+    "semana_grupos": [
+        {
+            "segmento": "chegada",
+            "grupo": "pedido real",
+            "n_antes": 152,
+            "retorno_antes_pct": 26.3,
+            "n_semana": 50,
+            "retorno_semana_pct": 14.0,
+        },
+        {
+            "segmento": "chegada",
+            "grupo": "só testa / pede imagem / burla",
+            "n_antes": 36,
+            "retorno_antes_pct": 8.3,
+            "n_semana": 14,
+            "retorno_semana_pct": 7.1,
+        },
+    ],
     "sensibilidade": [],
     "testes": [],
 }
@@ -150,6 +206,47 @@ def test_analise_e_estatica_e_marca_amostra_pequena(cliente: TestClient) -> None
     assert d["geral"]["retorno_pct"] == 18.4
     assert d["efeitos"][0]["suficiente"] is False
     assert d["coortes"][0]["suficiente"] is False
+
+
+# Amostra mínima (BDR-003): grupo com menos de 30 pessoas não sai da API com nenhum
+# número, nem a contagem. A garantia está no backend, não só na tela.
+
+
+def test_grupo_pequeno_do_explorar_sai_sem_numeros(cliente: TestClient) -> None:
+    d = cliente.get("/api/explorar").json()
+    tablet = next(g for g in d["grupos"]["dispositivo"] if g["categoria"] == "tablet")
+    assert tablet["suficiente"] is False
+    assert all(tablet[k] is None for k in NUMEROS)
+    mes = d["serie"][1]
+    assert all(mes[k] is None for k in NUMEROS)
+    tema = next(c for c in d["chegada"] if c["categoria"] == "outro")
+    assert tema["n"] is None and tema["pct_pessoas"] is None
+
+
+def test_recorte_pequeno_sai_sem_numeros_nem_na_frase(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def consultar(nome: str, params: dict[str, Any] | None = None) -> Any:
+        filtrado = bool(params and params.get("tema"))
+        return [RECORTE_PEQUENO] if nome == "resumo" and filtrado else LINHAS[nome]
+
+    monkeypatch.setattr(main, "consultar", consultar)
+    monkeypatch.setattr(main.pool, "open", lambda: None)
+    main._em_cache.cache_clear()
+    d = TestClient(main.app).get("/api/explorar?tema=estudo").json()
+    assert all(d["recorte"][k] is None for k in NUMEROS)
+    assert "12" not in d["frases"][0]
+
+
+def test_analise_esconde_numeros_de_grupo_pequeno(cliente: TestClient) -> None:
+    d = cliente.get("/api/analise").json()
+    assert d["coortes"][0]["novos"] is None and d["coortes"][0]["retorno_pct"] is None
+    assert d["efeitos"][0]["ajustado_pp"] is None
+    grupos = {g["grupo"]: g for g in d["semana"]["grupos"]}
+    assert grupos["pedido real"]["suficiente"] is True
+    pequeno = grupos["só testa / pede imagem / burla"]
+    assert pequeno["n_semana"] is None and pequeno["retorno_semana_pct"] is None
+    assert d["semana"]["segmentos"][0]["taxa_pp"] == -10.0
 
 
 def test_toda_resposta_tem_request_id_e_tempo(cliente: TestClient) -> None:

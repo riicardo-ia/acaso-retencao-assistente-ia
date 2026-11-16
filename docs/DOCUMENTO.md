@@ -57,7 +57,7 @@ Sobe com `docker compose up --build` e abre em `http://localhost:8000`. É um **
 | Retorno por mês, semana ou grupo | o mesmo, por mês, semana ou grupo do 1º uso | pessoas novas do mês, semana ou grupo | mês, semana ou grupo |
 | Efeito de um fator | efeito marginal médio da regressão logística (pontos percentuais) | as 2.266 pessoas | base inteira |
 
-**Amostra pequena:** com menos de 30 pessoas, o número principal vira "—" com "amplie o recorte", o ponto do mês fica vazado e a barra do grupo fica cinza com "poucas pessoas".
+**Amostra pequena:** com menos de 30 pessoas, a API não devolve nenhum número do grupo, nem a contagem. A tela mostra "menos de 30" e "amplie o recorte" no recorte, deixa o mês sem ponto e escreve "poucas pessoas" no lugar da barra.
 
 **Indicadores que só fizeram sentido depois de olhar os dados** (AN-3.1-08), já no dashboard:
 - retorno por tema da 1ª conversa;
@@ -68,7 +68,7 @@ Sobe com `docker compose up --build` e abre em `http://localhost:8000`. É um **
 
 Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas.
 
-**O que o dashboard mostra e o que nunca mostra.** Mostra só agregados e efeitos. **Nunca** mostra texto de conversa, IP, user-agent, estado ou qualquer recorte com menos de 30 pessoas. A base analítica nem chega a guardar texto, IP ou user-agent: o usuário vira `sha256(sal + hashed_ip)`.
+**O que o dashboard mostra e o que nunca mostra.** Mostra só agregados e efeitos. **Nunca** mostra texto de conversa, IP, user-agent, estado ou número de grupo com menos de 30 pessoas. A API devolve esses números vazios, e um teste garante isso. A base analítica nem chega a guardar texto, IP ou user-agent: o usuário vira `sha256(sal + hashed_ip)`.
 
 ## 4. Arquitetura
 

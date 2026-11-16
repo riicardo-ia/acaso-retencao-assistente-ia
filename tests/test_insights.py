@@ -8,6 +8,7 @@ BASE = {"n": 2266, "voltaram": 416}
 def test_recorte_pequeno_nao_conclui() -> None:
     frase = resumo({"n": 18, "voltaram": 1}, BASE, filtrado=True)
     assert "pouco para tirar conclusão" in frase and "%" not in frase
+    assert "18" not in frase  # a frase não revela o tamanho do grupo pequeno
 
 
 def test_sem_filtro_so_descreve() -> None:

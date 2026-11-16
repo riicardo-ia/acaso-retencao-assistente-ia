@@ -83,6 +83,7 @@ function explicacao(simples, tecnico, sql) {
 }
 const passoEixo = (max, partes = 4) => { const b = Math.max(max, 1) / partes, p = 10 ** Math.floor(Math.log10(b)); return [1, 2, 2.5, 5, 10].map((f) => f * p).find((x) => x >= b); };
 const MARGEM = "A faixa clara é a <b>margem de erro</b>: com poucas pessoas, o número pode variar por acaso dentro dela.";
+const POUCAS = (nMin) => `Menos de ${nMin} pessoas: o número não é mostrado.`;
 
 // Linha do retorno por mês, com a margem de erro sombreada; meses com poucas pessoas aparecem vazados.
 function graficoLinha(serie, media, nMin) {
@@ -102,26 +103,27 @@ function graficoLinha(serie, media, nMin) {
   if (media != null) s += `<line class="media" x1="${m.l}" x2="${W - m.r}" y1="${y(media)}" y2="${y(media)}"/>`;
   serie.forEach((p, i) => {
     if (serie.length <= 14 || i % 2 === 0) s += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${MES(p.mes)}</text>`;
-    s += `<circle cx="${x(i)}" cy="${y(p.retorno_pct)}" r="5" fill="${p.suficiente ? "var(--marca)" : "var(--cartao)"}" stroke="${p.suficiente ? "var(--cartao)" : "var(--neutro)"}" stroke-width="2"/>`;
-    const txt = `<b>${MES(p.mes)}</b><br>${N(p.n)} pessoas começaram · ${N(p.voltaram)} voltaram<br>Retorno: <b>${P(p.retorno_pct)}</b>` + (p.suficiente ? `<br>Margem de erro: ${FAIXA(p.ic_lo, p.ic_hi)}` : `<br>Poucas pessoas (menos de ${nMin}): não vale sozinho`);
-    s += `<rect class="alvo" tabindex="0" aria-label="${MES(p.mes)}: ${P(p.retorno_pct)}" x="${x(i) - 14}" y="${m.t}" width="28" height="${H - m.t - m.b}" data-dica="${esc(txt)}"/>`;
+    if (p.suficiente) s += `<circle cx="${x(i)}" cy="${y(p.retorno_pct)}" r="5" fill="var(--marca)" stroke="var(--cartao)" stroke-width="2"/>`;
+    const txt = `<b>${MES(p.mes)}</b><br>` + (p.suficiente ? `${N(p.n)} pessoas começaram · ${N(p.voltaram)} voltaram<br>Retorno: <b>${P(p.retorno_pct)}</b><br>Margem de erro: ${FAIXA(p.ic_lo, p.ic_hi)}` : POUCAS(nMin));
+    s += `<rect class="alvo" tabindex="0" aria-label="${MES(p.mes)}: ${p.suficiente ? P(p.retorno_pct) : `menos de ${nMin} pessoas`}" x="${x(i) - 14}" y="${m.t}" width="28" height="${H - m.t - m.b}" data-dica="${esc(txt)}"/>`;
   });
   return s + "</svg>";
 }
 
 // Colunas: quantas pessoas começaram em cada mês.
-function graficoColunas(serie) {
+function graficoColunas(serie, nMin) {
   const W = 380, H = 280, m = { l: 40, r: 8, t: 14, b: 30 };
-  const max = Math.max(1, ...serie.map((s) => s.n)), passo = passoEixo(max), topo = Math.ceil(max / passo) * passo;
+  const max = Math.max(1, ...serie.map((s) => s.n ?? 0)), passo = passoEixo(max), topo = Math.ceil(max / passo) * passo;
   const bw = (W - m.l - m.r) / serie.length;
   const y = (v) => m.t + (H - m.t - m.b) * (1 - v / topo);
   let s = `<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="Pessoas novas por mês">`;
   for (let v = 0; v <= topo; v += passo) s += `<line class="grade" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${N(v)}</text>`;
   serie.forEach((p, i) => {
     const x0 = m.l + i * bw;
-    s += `<rect x="${x0 + bw * 0.15}" y="${y(p.n)}" width="${bw * 0.7}" height="${y(0) - y(p.n)}" rx="3" fill="var(--marca-clara)"/>`;
+    if (p.suficiente) s += `<rect x="${x0 + bw * 0.15}" y="${y(p.n)}" width="${bw * 0.7}" height="${y(0) - y(p.n)}" rx="3" fill="var(--marca-clara)"/>`;
     if (i % 3 === 0) s += `<text x="${x0 + bw / 2}" y="${H - 8}" text-anchor="middle">${MES(p.mes)}</text>`;
-    s += `<rect class="alvo" tabindex="0" x="${x0}" y="${m.t}" width="${bw}" height="${H - m.t - m.b}" aria-label="${MES(p.mes)}: ${N(p.n)} pessoas" data-dica="${esc(`<b>${MES(p.mes)}</b><br>${N(p.n)} pessoas usaram pela 1ª vez`)}"/>`;
+    const txt = p.suficiente ? `${N(p.n)} pessoas usaram pela 1ª vez` : POUCAS(nMin);
+    s += `<rect class="alvo" tabindex="0" x="${x0}" y="${m.t}" width="${bw}" height="${H - m.t - m.b}" aria-label="${MES(p.mes)}: ${p.suficiente ? `${N(p.n)} pessoas` : `menos de ${nMin} pessoas`}" data-dica="${esc(`<b>${MES(p.mes)}</b><br>${txt}`)}"/>`;
   });
   return s + "</svg>";
 }
@@ -135,6 +137,7 @@ function graficoBarras(linhas, media, nMin, W = 560) {
   const x = (v) => m.l + (v / topo) * (W - m.l - m.r);
   let s = `<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="Retorno por grupo">`;
   for (let v = 0; v <= topo; v += passoEixo(topo)) s += `<line class="grade" x1="${x(v)}" x2="${x(v)}" y1="${m.t}" y2="${H - m.b}"/><text x="${x(v)}" y="${H - 8}" text-anchor="middle">${v}%</text>`;
+  if (media != null) s += `<line class="media" x1="${x(media)}" x2="${x(media)}" y1="${m.t - 2}" y2="${H - m.b}"/>`;
   ord.forEach((l, i) => {
     const yc = m.t + i * lh + lh / 2;
     s += `<text class="rot" x="${m.l - 10}" y="${yc + 4}" text-anchor="end">${esc(rot(l.categoria))}</text>`;
@@ -143,13 +146,11 @@ function graficoBarras(linhas, media, nMin, W = 560) {
       s += `<line x1="${x(l.ic_lo)}" x2="${x(l.ic_hi)}" y1="${yc}" y2="${yc}" stroke="var(--texto)" stroke-opacity=".45" stroke-width="2"/>`;
       s += `<text x="${x(Math.max(l.ic_hi, l.retorno_pct)) + 6}" y="${yc + 4}" style="fill:var(--texto)">${P(l.retorno_pct)}</text>`;
     } else {
-      s += `<rect x="${m.l}" y="${yc - 9}" width="${x(l.retorno_pct) - m.l}" height="18" rx="4" fill="var(--linha)"/>`;
-      s += `<text x="${x(l.retorno_pct) + 6}" y="${yc + 4}">poucas pessoas</text>`;
+      s += `<rect x="${m.l + 2}" y="${yc - 10}" width="104" height="20" rx="10" fill="var(--fundo)" stroke="var(--linha)"/><text x="${m.l + 54}" y="${yc + 4}" text-anchor="middle">poucas pessoas</text>`;
     }
-    const txt = `<b>${esc(rot(l.categoria))}</b><br>${N(l.n)} pessoas · ${N(l.voltaram)} voltaram<br>Retorno: <b>${P(l.retorno_pct)}</b>` + (l.suficiente ? `<br>Margem de erro: ${FAIXA(l.ic_lo, l.ic_hi)}` : `<br>Menos de ${nMin} pessoas: o número não vale sozinho`);
-    s += `<rect class="alvo" tabindex="0" x="0" y="${yc - lh / 2}" width="${W}" height="${lh}" aria-label="${esc(rot(l.categoria))}: ${P(l.retorno_pct)}" data-dica="${esc(txt)}"/>`;
+    const txt = `<b>${esc(rot(l.categoria))}</b><br>` + (l.suficiente ? `${N(l.n)} pessoas · ${N(l.voltaram)} voltaram<br>Retorno: <b>${P(l.retorno_pct)}</b><br>Margem de erro: ${FAIXA(l.ic_lo, l.ic_hi)}` : POUCAS(nMin));
+    s += `<rect class="alvo" tabindex="0" x="0" y="${yc - lh / 2}" width="${W}" height="${lh}" aria-label="${esc(rot(l.categoria))}: ${l.suficiente ? P(l.retorno_pct) : `menos de ${nMin} pessoas`}" data-dica="${esc(txt)}"/>`;
   });
-  if (media != null) s += `<line class="media" x1="${x(media)}" x2="${x(media)}" y1="${m.t - 2}" y2="${H - m.b}"/>`;
   return s + "</svg>";
 }
 
@@ -157,12 +158,13 @@ function graficoBarras(linhas, media, nMin, W = 560) {
 function graficoChegada(linhas) {
   const lh = 40, W = 760, m = { l: 230, r: 60, t: 6, b: 6 };
   const H = m.t + m.b + lh * linhas.length;
-  const max = Math.max(1, ...linhas.map((l) => Math.max(l.pct_pessoas, l.pct_conversas)));
+  const max = Math.max(1, ...linhas.filter((l) => l.suficiente).map((l) => Math.max(l.pct_pessoas, l.pct_conversas)));
   const w = (v) => (v / max) * (W - m.l - m.r);
   let s = `<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="Com que tema as pessoas chegam">`;
   linhas.forEach((l, i) => {
     const y0 = m.t + i * lh;
     s += `<text class="rot" x="${m.l - 10}" y="${y0 + lh / 2 + 4}" text-anchor="end">${esc(rot(l.categoria))}</text>`;
+    if (!l.suficiente) { s += `<text x="${m.l + 6}" y="${y0 + lh / 2 + 4}">poucas pessoas</text>`; return; }
     s += `<rect x="${m.l}" y="${y0 + 5}" width="${w(l.pct_pessoas)}" height="13" rx="3" fill="var(--marca)"/><text x="${m.l + w(l.pct_pessoas) + 6}" y="${y0 + 16}">${P(l.pct_pessoas)}</text>`;
     s += `<rect x="${m.l}" y="${y0 + 21}" width="${w(l.pct_conversas)}" height="13" rx="3" fill="var(--laranja)"/><text x="${m.l + w(l.pct_conversas) + 6}" y="${y0 + 32}">${P(l.pct_conversas)}</text>`;
   });
@@ -214,21 +216,21 @@ async function paginaExplorar(el, qs) {
     <div class="frases"><h2>O que este recorte mostra</h2><ul>${d.frases.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
       <p class="nota">Frases geradas por regras fixas: uma diferença só é chamada de "confirmada" quando é maior que a margem de erro (com 99% de confiança). São comparações simples; para o efeito comparando pessoas parecidas, veja a <a href="#analise">Análise completa</a>.</p></div>
     <div class="grade g4">
-      ${kpi("Voltaram em até 7 dias", r.suficiente ? P(r.retorno_pct) : "—", r.suficiente ? `margem de erro: ${FAIXA(r.ic_lo, r.ic_hi)}` : `menos de ${d.n_min} pessoas: amplie o recorte`, "destaque")}
-      ${kpi("Pessoas no recorte", N(r.n), "usaram o assistente pela 1ª vez no período")}
-      ${kpi("Voltaram", N(r.voltaram), "usaram de novo em outro dia, em até 7 dias")}
+      ${kpi("Voltaram em até 7 dias", r.suficiente ? P(r.retorno_pct) : "—", r.suficiente ? `margem de erro: ${FAIXA(r.ic_lo, r.ic_hi)}` : "amplie o recorte para ver o número", "destaque")}
+      ${kpi("Pessoas no recorte", r.suficiente ? N(r.n) : `menos de ${d.n_min}`, "usaram o assistente pela 1ª vez no período")}
+      ${kpi("Voltaram", r.suficiente ? N(r.voltaram) : "—", r.suficiente ? "usaram de novo em outro dia, em até 7 dias" : "amplie o recorte para ver o número")}
       ${kpi("Toda a base", P(b.retorno_pct), `${N(b.n)} pessoas, sem filtro`)}
     </div>
     <div class="grade g21">
       <div class="cartao"><h2>Retorno mês a mês</h2>
-        <p class="ajuda">Cada ponto: das pessoas que começaram naquele mês, quantas voltaram. ${MARGEM} Pontos vazados têm poucas pessoas.</p>
-        ${!d.serie.length ? `<p class="estado">Sem pessoas neste recorte.</p>` : (d.serie.some((s) => s.suficiente) ? "" : `<p class="ajuda"><b>Nenhum mês tem ${d.n_min} pessoas ou mais neste recorte</b>: os pontos aparecem só como referência.</p>`) + graficoLinha(d.serie, r.suficiente ? r.retorno_pct : null, d.n_min)}
-        <div class="legenda"><span><i style="background:var(--marca)"></i>retorno do mês</span><span><i class="faixa"></i>margem de erro</span><span><i class="linha"></i>média do recorte</span></div>
+        <p class="ajuda">Cada ponto: das pessoas que começaram naquele mês, quantas voltaram. ${MARGEM} Meses com menos de ${d.n_min} pessoas ficam sem ponto.</p>
+        ${!d.serie.length ? `<p class="estado">Sem pessoas neste recorte.</p>` : d.serie.some((s) => s.suficiente) ? graficoLinha(d.serie, r.suficiente ? r.retorno_pct : null, d.n_min) : `<p class="estado">Nenhum mês tem ${d.n_min} pessoas ou mais neste recorte. Amplie o período ou retire algum filtro para ver a evolução.</p>`}
+        <div class="legenda" ${d.serie.some((s) => s.suficiente) ? "" : "hidden"}><span><i style="background:var(--marca)"></i>retorno do mês</span><span><i class="faixa"></i>margem de erro</span><span><i class="linha"></i>média do recorte</span></div>
         ${explicacao("Para cada mês, contamos quem usou o assistente pela primeira vez naquele mês e quantas dessas pessoas voltaram a usar em outro dia, em até 7 dias.", "Retorno = pessoas com uso entre D+1 e D+7 (dia local de São Paulo) ÷ pessoas novas; margem de erro = intervalo de confiança de 95% de Wilson, calculado no banco.", { "Retorno por mês": d.sql["Retorno por mês"] })}
       </div>
       <div class="cartao"><h2>Pessoas novas por mês</h2>
         <p class="ajuda">Quantas pessoas usaram o assistente pela primeira vez, mês a mês, neste recorte.</p>
-        ${graficoColunas(d.serie)}
+        ${d.serie.some((s) => s.suficiente) ? graficoColunas(d.serie, d.n_min) : `<p class="estado">Nenhum mês tem ${d.n_min} pessoas ou mais neste recorte.</p>`}
       </div>
     </div>
     <div class="grade g3">
@@ -249,7 +251,7 @@ function cartaoGrupo(d, dim, classificacao) {
   return `<div class="cartao"><h2>Quem volta mais? Por ${DIMS[dim].toLowerCase()}</h2>
     <p class="ajuda">${filtrado ? `Filtrado em “${esc(rot(filtrado))}”. ` : ""}A barra é o retorno de cada grupo; a linha fina é a margem de erro; a linha tracejada é a média do recorte.</p>
     ${graficoBarras(d.grupos[dim], d.recorte.suficiente ? d.recorte.retorno_pct : null, d.n_min, dim === "tema" ? 760 : 420)}
-    ${explicacao(classificacao ? classificacao.simples : "Mesma conta do retorno, separada por grupo. Grupos com menos de 30 pessoas ficam em cinza, sem número próprio.", classificacao ? classificacao.tecnico : "Comparação simples (não leva em conta outras diferenças entre os grupos). Margem de erro = IC de 95% de Wilson.", { "Por grupo (exemplo: por tema; as outras dimensões trocam só a coluna agrupada)": d.sql["Por grupo"] })}
+    ${explicacao(classificacao ? classificacao.simples : "Mesma conta do retorno, separada por grupo. Grupos com menos de 30 pessoas aparecem como “poucas pessoas”, sem número.", classificacao ? classificacao.tecnico : "Comparação simples (não leva em conta outras diferenças entre os grupos). Margem de erro = IC de 95% de Wilson.", { "Por grupo (exemplo: por tema; as outras dimensões trocam só a coluna agrupada)": d.sql["Por grupo"] })}
   </div>`;
 }
 
@@ -333,11 +335,10 @@ async function paginaAnalise(el) {
 
   const regime = d.gpt4.filter((x) => x.metodo !== "IPW");
   const ipw = d.gpt4.find((x) => x.metodo === "IPW");
-  const ch = d.semana.filter((s) => s.segmento === "chegada");
-  const antes = 100 * ch.reduce((a, s) => a + s.peso_antes * s.retorno_antes, 0);
-  const naSemana = 100 * ch.reduce((a, s) => a + s.peso_semana * s.retorno_semana, 0);
-  const real = ch.find((s) => s.grupo === "pedido real");
-  const sem = d.semana.length ? d.semana[0].semana : null;
+  const sw = d.semana || { grupos: [] };
+  const antes = sw.retorno_antes_pct, naSemana = sw.retorno_semana_pct;
+  const real = sw.grupos.find((s) => s.segmento === "chegada" && s.grupo === "pedido real" && s.suficiente);
+  const sem = sw.semana || null;
 
   el.innerHTML = `
     <h1>Análise completa</h1>
@@ -372,9 +373,9 @@ async function paginaAnalise(el) {
       <div class="cartao"><h2>${sem ? `A semana de ${DATA(sem)}: por que o retorno caiu?` : "A semana analisada"}</h2>
         <p class="ajuda">Voltaram em até 7 dias, de cada 100 pessoas:</p>
         ${barras100([{ nome: "4 semanas anteriores", valor: antes, cor: "var(--neutro)" }, { nome: `Semana de ${sem ? DATA(sem).slice(0, 5) : ""}`, valor: naSemana, cor: "var(--ruim)" }])}
-        <p><b>Não mudou o tipo de pessoa que chegou</b>: ${real ? `${C100(100 * real.peso_semana)} de cada 100 chegaram com um pedido real, contra ${C100(100 * real.peso_antes)} antes` : "o perfil foi o mesmo"}. <b>Mudou o retorno de quem chegou</b>${real ? `: entre quem chegou com pedido real, ${C100(100 * real.retorno_antes)} de cada 100 voltavam; nessa semana, ${C100(100 * real.retorno_semana)}` : ""}.</p>
+        <p><b>Não mudou o tipo de pessoa que chegou</b>: ${real ? `${C100(real.peso_semana_pct)} de cada 100 chegaram com um pedido real, contra ${C100(real.peso_antes_pct)} antes` : "o perfil foi o mesmo"}. <b>Mudou o retorno de quem chegou</b>${real ? `: entre quem chegou com pedido real, ${C100(real.retorno_antes_pct)} de cada 100 voltavam; nessa semana, ${C100(real.retorno_semana_pct)}` : ""}.</p>
         <p class="achado">Mas atenção: chegam cerca de 45 pessoas por semana, e com tão pouca gente o número oscila bastante por acaso. Olhando todas as semanas juntas, <b>não há diferença comprovada entre elas</b>. Para decidir, acompanhe a tendência de várias semanas, não uma semana isolada.</p>
-        ${explicacao("Separamos a queda em duas partes: a que viria de chegarem mais pessoas de um tipo que volta menos (perfil) e a que vem de cada tipo voltar menos do que antes (taxa). Quase toda a queda foi de taxa.", `Decomposição de Kitagawa contra as 4 semanas anteriores; diferença ${t.semana_analisada ? `${n1.format(t.semana_analisada.valor)} pp (IC 95% ${n1.format(t.semana_analisada.lo)} a ${n1.format(t.semana_analisada.hi)}; p = ${n1.format(t.semana_analisada.p)})` : ""}; teste qui-quadrado de homogeneidade entre as semanas com 30 pessoas ou mais${t.homogeneidade_semanas ? ` (p = ${n1.format(t.homogeneidade_semanas.p)})` : ""}.`, { "Decomposição": d.sql.semana, "Testes": d.sql.testes })}
+        ${explicacao("Separamos a queda em duas partes: a que viria de chegarem mais pessoas de um tipo que volta menos (perfil) e a que vem de cada tipo voltar menos do que antes (taxa). Quase toda a queda foi de taxa.", `Decomposição de Kitagawa contra as 4 semanas anteriores; diferença ${t.semana_analisada ? `${n1.format(t.semana_analisada.valor)} pp (IC 95% ${n1.format(t.semana_analisada.lo)} a ${n1.format(t.semana_analisada.hi)}; p = ${n1.format(t.semana_analisada.p)})` : ""}; teste qui-quadrado de homogeneidade entre as semanas com 30 pessoas ou mais${t.homogeneidade_semanas ? ` (p = ${n1.format(t.homogeneidade_semanas.p)})` : ""}.`, { "Antes e na semana": d.sql.semana_total, "Decomposição": d.sql.semana_segmentos, "Testes": d.sql.testes })}
       </div>
     </div>
 
@@ -399,7 +400,7 @@ function rodape(p) {
   $("#rodape").innerHTML = `<b>Fonte:</b> ${esc(p.fonte)} · ${N(p.linhas_brasil)} conversas do Brasil, de ${N(p.linhas_fonte)} na base ·
     <b>Atualizado em</b> ${new Date(p.carga_em).toLocaleString("pt-BR")} (versão ${esc(p.versao_codigo)}) ·
     ${p.reconciliacao_ok ? "números conferidos contra a base bruta ✓" : "<b>ATENÇÃO: a conferência contra a base bruta falhou</b>"}<br>
-    <b>Definição:</b> ${esc(p.definicao_retorno)} Nenhuma tela mostra texto de conversa, IP ou navegador; grupos com menos de 30 pessoas não têm número próprio.`;
+    <b>Definição:</b> ${esc(p.definicao_retorno)} Nenhuma tela mostra texto de conversa, IP ou navegador, nem números de grupos com menos de 30 pessoas.`;
 }
 
 async function mostrar() {

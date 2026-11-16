@@ -56,7 +56,7 @@ def resumo(recorte: dict[str, int], base: dict[str, int], filtrado: bool) -> str
     n, k = recorte["n"], recorte["voltaram"]
     if n < N_MIN:
         return (
-            f"Só {n} pessoas neste recorte: é pouco para tirar conclusão. "
+            f"Menos de {N_MIN} pessoas neste recorte: é pouco para tirar conclusão. "
             "Amplie o período ou retire algum filtro."
         )
     frase = f"Neste recorte, {pct(k / n)} das {n:_} pessoas voltaram em até 7 dias.".replace(

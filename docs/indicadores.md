@@ -38,7 +38,7 @@ A margem de erro (IC 95% de Wilson) é a função `mart.wilson(voltaram, pessoas
 | Fórmula | voltaram ÷ pessoas novas elegíveis |
 | Denominador | pessoas novas elegíveis (2.266 na base inteira) |
 | Período | 1º uso entre 22/04/2023 e 21/04/2024 (ou o período do filtro) |
-| Amostra pequena | com menos de 30 pessoas, a tela mostra "—" e "amplie o recorte" |
+| Amostra pequena | com menos de 30 pessoas, a API não devolve nenhum número (nem a contagem); a tela mostra "menos de 30" e "amplie o recorte" |
 
 ```sql
 SELECT usuarios, voltaram, retorno_pct, ic_lo, ic_hi FROM mart.vw_retorno_geral;   -- Análise completa
@@ -66,7 +66,7 @@ FROM recorte;
 | Definição | o mesmo retorno, para quem começou em cada mês (Explorar) ou semana (Análise) |
 | Denominador | pessoas novas do mês/semana |
 | Período | mês/semana do 1º uso (semana de segunda a domingo, horário de São Paulo) |
-| Amostra pequena | ponto vazado e "poucas pessoas" com menos de 30 |
+| Amostra pequena | mês ou semana com menos de 30 pessoas sai sem números da API e fica sem ponto na tela |
 
 ```sql
 -- Explorar: o mesmo "recorte" acima, agrupado por mês
@@ -86,7 +86,7 @@ SELECT semana, novos, voltaram, retorno_pct, ic_lo, ic_hi FROM mart.mv_coortes_s
 |---|---|
 | Definição | retorno de cada grupo de idioma, dispositivo, tema da 1ª conversa ou modelo |
 | Denominador | pessoas do grupo, dentro do recorte |
-| Amostra pequena | barra cinza "poucas pessoas", sem número |
+| Amostra pequena | grupo com menos de 30 pessoas sai sem números da API; a tela escreve "poucas pessoas" no lugar da barra |
 | Leitura | comparação simples; a frase só chama de "confirmada" uma diferença que passa no teste de duas proporções a 99% |
 
 ```sql
@@ -103,9 +103,11 @@ FROM recorte GROUP BY tema ORDER BY retorno_pct DESC;   -- idem para idioma, dis
 |---|---|
 | Definição | % das pessoas pelo tema da 1ª conversa × % de todas as conversas dessas pessoas |
 | Denominador | pessoas do recorte / conversas das pessoas do recorte |
+| Período | o do filtro |
+| Amostra pequena | tema com menos de 30 pessoas sai sem números da API; a tela escreve "poucas pessoas" |
 
 ```sql
-SELECT r.tema AS categoria,
+SELECT r.tema AS categoria, count(DISTINCT r.usuario_id) AS n,
        round(100.0 * count(DISTINCT r.usuario_id) / sum(count(DISTINCT r.usuario_id)) OVER (), 1) AS pct_pessoas,
        round(100.0 * count(c.conv_id) / sum(count(c.conv_id)) OVER (), 1) AS pct_conversas
 FROM recorte r JOIN mart.conversas c ON c.usuario_id = r.usuario_id
@@ -119,7 +121,8 @@ GROUP BY r.tema ORDER BY pct_pessoas DESC;
 | Definição | quantos pontos percentuais a mais ou a menos voltam com a característica, comparando pessoas parecidas |
 | Fórmula | efeito marginal médio de uma regressão logística com todos os fatores e a época; IC 95% pelo método delta |
 | Denominador | as 2.266 pessoas elegíveis |
-| Amostra pequena | grupos com menos de 30 pessoas não aparecem |
+| Período | base inteira (1º uso entre 22/04/2023 e 21/04/2024) |
+| Amostra pequena | grupo com menos de 30 pessoas sai sem números da API e não aparece |
 
 Calculado na carga (`analise/efeitos.py`) e gravado em `mart.efeitos`:
 
