@@ -110,7 +110,7 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 
 | Endpoint | Entrada | Saída |
 |---|---|---|
-| `GET /api/explorar` | `inicio`, `fim` (AAAA-MM-DD) e `idioma`, `dispositivo`, `tema`, `modelo` (opcionais; valor fora da lista → 400) | recorte e base com margem de erro, série mensal, retorno por grupo nas 4 dimensões, chegada por tema, frases, opções dos filtros, procedência, SQL |
+| `GET /api/explorar` | `inicio`, `fim` (AAAA-MM-DD) e `idioma`, `dispositivo`, `tema`, `modelo` (opcionais; valor fora da lista → 400); `lang` = idioma da tela (`pt`, `en` ou `es`, usado nas frases) | recorte e base com margem de erro, série mensal, retorno por grupo nas 4 dimensões, chegada por tema, frases, opções dos filtros, procedência, SQL |
 | `GET /api/analise` | — | retorno geral e por semana, efeitos bruto e ajustado com IC, GPT-4 por três métodos, decomposição da semana, sensibilidade, testes, procedência, SQL |
 | `GET /api/documentos` | — | índice da Documentação: nome, grupo e título de cada documento |
 | `GET /api/documentos/{nome}` | nome de um documento da lista (fora dela → 404) | título e HTML do documento, com os links internos apontando para a própria página |
@@ -119,9 +119,9 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 Documentação interativa em `/api/docs`.
 
 **Outros países.**
-- **Interface:** a tela usa `Intl` e textos centralizados; basta um dicionário por idioma.
-- **Fuso:** é o ponto crítico, porque o retorno é por dia local. O fuso deixa de ser constante e vira coluna `fuso` por país (ou por estado, para países com vários), usada em `vw_usuarios` no lugar de `'America/Sao_Paulo'`.
-- **Comparação:** `pais` entra como dimensão em todas as tabelas do `mart` e nas rotas (`?pais=`). O modelo de efeitos roda por país, e os países são comparados pelos efeitos com IC, não por taxas brutas, porque o perfil de chegada muda entre eles.
+- **Interface: pronta.** A tela já está em português, inglês e espanhol (seletor no topo, ou `/?lang=en`). Cada texto passa por uma função de tradução com o português como chave; as traduções ficam em `app/static/i18n.json`, e `tests/test_traducoes.py` falha se uma frase nova ficar sem tradução. Números e datas seguem o formato de cada idioma, e as frases automáticas vêm da API no idioma da tela (`lang`). Os documentos continuam em português.
+- **Fuso: ainda fixo.** É o ponto crítico, porque o retorno é por dia local. Hoje `'America/Sao_Paulo'` está em `vw_usuarios` e no banco. Para outros países, o fuso vira coluna por país (ou por estado, para países com vários, como o próprio Brasil), usada em `vw_usuarios` no lugar da constante.
+- **Comparação: ainda não existe.** `pais` entra como dimensão em todas as tabelas do `mart` e nas rotas (`?pais=`). O modelo de efeitos roda por país, e os países são comparados pelos efeitos com IC, não por taxas brutas, porque o perfil de chegada muda entre eles.
 - **Temas:** precisam de revalidação por idioma.
 
 **Desempenho.**

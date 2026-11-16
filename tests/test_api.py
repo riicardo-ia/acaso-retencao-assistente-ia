@@ -312,3 +312,11 @@ def test_documento_fora_da_lista_e_404(cliente: TestClient, caminho: str) -> Non
 def test_imagem_da_documentacao_e_servida(cliente: TestClient) -> None:
     r = cliente.get("/documentacao/arquivos/img/arquitetura.svg")
     assert r.status_code == 200 and r.content.startswith(b"<svg")
+
+
+def test_frases_no_idioma_da_tela(cliente: TestClient) -> None:
+    en = cliente.get("/api/explorar?lang=en").json()["frases"][0]
+    assert en == "In this segment, 18.4% of the 2,266 people came back within 7 days."
+    es = cliente.get("/api/explorar?lang=es").json()["frases"][0]
+    assert es.startswith("En este recorte, el 18,4% de las 2.266 personas")
+    assert cliente.get("/api/explorar?lang=fr").status_code == 400

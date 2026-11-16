@@ -10,17 +10,22 @@
 </head>
 <body>
   <header class="topo">
-    <a class="marca" href="#resposta" aria-label="Início">
+    <a class="marca" href="#resposta" aria-label="Início" data-t-aria="Início">
       <svg viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M40.9 44.9v1.6c-2.5 1.5-5.5 2.4-8.7 2.4-9.3 0-16.8-7.5-16.8-16.8s.9-6.3 2.5-8.8h1.4C31.3 23.3 41 33 41 45ZM61 32.1c0-8.1-2.8-15-8.4-20.5S40.2 3.3 32.1 3.3s-14.9 2.8-20.5 8.3S3.2 24 3.2 32.1s2.8 15 8.4 20.5 12.4 8.3 20.5 8.3 14.9-2.8 20.5-8.3S61 40.2 61 32.1m-50.5 0c0-6.1 2.1-11.2 6.3-15.4s9.3-6.3 15.4-6.3 11.2 2.1 15.4 6.3 6.3 9.4 6.3 15.4-2.1 11.2-6.3 15.4-9.3 6.3-15.4 6.3-11.2-2.1-15.4-6.3-6.3-9.4-6.3-15.4m25-16.4c-.3 1-.5 2-.5 3.1 0 5.7 4.6 10.4 10.4 10.4s2.2-.2 3.2-.5c-1.4-6.5-6.6-11.7-13.1-13"/></svg>
-      <span class="nome">acaso</span><span class="produto">Retorno do assistente · Brasil</span>
+      <span class="nome">acaso</span><span class="produto" data-t="Retorno do assistente · Brasil">Retorno do assistente · Brasil</span>
     </a>
     <nav>
-      <a href="#resposta" data-aba="resposta">A resposta</a>
-      <a href="#explorar" data-aba="explorar">Explorar</a>
-      <a href="#documentacao" data-aba="documentacao">Documentação</a>
+      <a href="#resposta" data-aba="resposta" data-t="A resposta">A resposta</a>
+      <a href="#explorar" data-aba="explorar" data-t="Explorar">Explorar</a>
+      <a href="#documentacao" data-aba="documentacao" data-t="Documentação">Documentação</a>
     </nav>
+    <div class="linguas" role="group" aria-label="Idioma da tela" data-t-aria="Idioma da tela">
+      <button type="button" data-lingua="pt" lang="pt-BR" title="Português">PT</button>
+      <button type="button" data-lingua="en" lang="en" title="English">EN</button>
+      <button type="button" data-lingua="es" lang="es" title="Español">ES</button>
+    </div>
   </header>
-  <section id="filtros" class="filtros" hidden aria-label="Filtros"></section>
+  <section id="filtros" class="filtros" hidden aria-label="Filtros" data-t-aria="Filtros"></section>
   <main id="conteudo" aria-live="polite"><p class="estado">Carregando…</p></main>
   <footer id="rodape" class="rodape"></footer>
   <div id="dica" class="dica" role="tooltip" hidden></div>

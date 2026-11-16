@@ -353,8 +353,14 @@ def explorar(
     dispositivo: str | None = None,
     tema: str | None = None,
     modelo: str | None = None,
+    lang: str = "pt",
 ) -> dict[str, Any]:
-    """Tela Explorar: números descritivos com os 5 filtros e frases por regra."""
+    """Tela Explorar: números descritivos com os 5 filtros e frases por regra.
+
+    `lang` é o idioma da tela (pt, en ou es), usado só nas frases; `idioma` é o filtro
+    pelo idioma da conversa."""
+    if lang not in insights.LINGUAS:
+        raise HTTPException(400, "idioma da tela inválido (use pt, en ou es)")
     valores = {
         "idioma": idioma,
         "dispositivo": dispositivo,
@@ -373,14 +379,18 @@ def explorar(
     base = dados("resumo", sem_filtro)[0]
     grupos = {d: dados(f"grupo_{d}", params) for d in DIMENSOES}
     # As frases usam as contagens completas, mas só citam grupos com N_MIN pessoas ou mais.
-    frases = [insights.resumo(recorte, base, filtrado)]
+    frases = [insights.resumo(recorte, base, filtrado, lang)]
     if recorte["n"] >= N_MIN:
         frases += insights.destaques(
             {
-                d: [{**g, "rotulo": insights.rotulo(g["categoria"])} for g in linhas]
+                d: [
+                    {**g, "rotulo": insights.rotulo(g["categoria"], lang, d)}
+                    for g in linhas
+                ]
                 for d, linhas in grupos.items()
             },
             {d: v for d, v in valores.items() if v},
+            lang,
         )
     return {
         "filtros": {k: str(v) if isinstance(v, date) else v for k, v in params.items()},

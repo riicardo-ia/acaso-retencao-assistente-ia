@@ -67,3 +67,10 @@ def test_dimensao_filtrada_nao_gera_destaque() -> None:
     assert destaques(grupos, filtros={"dispositivo": "celular"}) == [
         "Nenhum grupo se destaca de forma confirmada neste recorte."
     ]
+
+
+def test_frases_em_ingles_e_espanhol() -> None:
+    frase = resumo({"n": 330, "voltaram": 21}, BASE, filtrado=True, lingua="en")
+    assert "less than in the rest of the base" in frase and "confirmed" in frase
+    pequeno = resumo({"n": 18, "voltaram": 1}, BASE, filtrado=True, lingua="es")
+    assert pequeno.startswith("Menos de 30 personas") and "18" not in pequeno
