@@ -1,4 +1,4 @@
-"""Passo 6 (AN-3.2-03): uma semana em que o retorno caiu ou subiu, e o que explica.
+"""Passo 6: uma semana em que o retorno caiu ou subiu, e o que explica.
 
 1. A variação entre semanas é maior que o acaso? Qui-quadrado de homogeneidade
    entre as coortes semanais com n >= 30.

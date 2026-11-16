@@ -1,7 +1,6 @@
 # Passo 6 · A resposta: o que faz quem experimentou voltar em até 7 dias
 
 **Pergunta do cliente:** o que faz uma pessoa que experimentou o assistente voltar a usá-lo em até 7 dias? Quais fatores têm o maior efeito, quanto pesa cada um e quanto disso é causa e não seleção?
-**Requisitos:** AN-1-01..05, AN-3.2-01..04, AN-3.1-07/08.
 **Reprodução:** `python -m analise.tabela && python -m analise.efeitos && python -m analise.semana 2023-11-20`.
 
 **Base:** 2.266 pessoas que usaram o assistente pela 1ª vez entre abr/2023 e abr/2024 (Brasil). **18,4% voltaram** em outro dia, entre o 1º e o 7º dia (IC 95%: 16,8–20,0). Definições: [BDR-001](../bdr/BDR-001-definicoes-de-uso-e-retorno.md).
@@ -92,15 +91,15 @@ Se a escolha do GPT-4 fosse seleção de gente mais engajada, o efeito seria mai
 
 ## 5. Sugestões que saíram dos dados
 
-**Para o assistente** (AN-3.1-07): tratar "só testando" como intenção de descoberta (onboarding com exemplos); para pedido de imagem/mídia, uma resposta útil em vez de "não consigo"; atenção a temas de estudo (−5 pp), em que a resposta pode estar menos aderente ao que o estudante precisa.
+**Para o assistente:** tratar "só testando" como intenção de descoberta (onboarding com exemplos); para pedido de imagem/mídia, uma resposta útil em vez de "não consigo"; atenção a temas de estudo (−5 pp), em que a resposta pode estar menos aderente ao que o estudante precisa.
 
-**Para o dashboard** (AN-3.1-08), indicadores pensados só depois de olhar os dados:
+**Para o dashboard**, indicadores pensados só depois de olhar os dados:
 - **% de chegadas "só testando" ou "pedindo mídia"** por semana: o maior fator de não retorno, acompanhável;
 - **retorno por dispositivo** como segmento fixo;
 - **faixa esperada pelo acaso** em cada coorte semanal, para não alarmar com ruído;
 - **sensibilidade da definição** visível ("se voltar no mesmo dia contasse, seria 28%").
 
-## 6. O que os dados permitem, o que não permitem e o que falta (AN-3.1-06)
+## 6. O que os dados permitem, o que não permitem e o que falta
 
 | Permitem | Não permitem | Faltaria para responder melhor |
 |---|---|---|

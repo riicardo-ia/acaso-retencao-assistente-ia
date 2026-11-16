@@ -2,7 +2,6 @@
 
 **Fonte:** `allenai/WildChat-1M` (HuggingFace), 14 arquivos, 837.989 conversas → **11.621 com `country = 'Brazil'`**.
 **Reprodução:** `python -m analise.qualidade` (cada número abaixo sai de uma consulta nomeada no script).
-**Requisito atendido:** AN-3.1-04 (problemas de qualidade e como tratou cada um).
 
 ## Problemas encontrados e tratamento
 

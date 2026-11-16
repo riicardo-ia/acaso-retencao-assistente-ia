@@ -2,7 +2,6 @@
 
 **Unidade:** uma linha por usuário elegível (2.266; BDR-001 rev. 1). A 1ª experiência é o **1º dia local de uso**: só entram as conversas que começam nele. A **1ª conversa** é a que começa primeiro (horário da 1ª resposta, Q1); empate: menor `conv_id`.
 **Reprodução:** `python -m analise.tabela` → `data/tmp/usuarios.parquet` · regras em `analise/variaveis.py`, testadas em `tests/test_variaveis.py`.
-**Requisito:** AN-3.1-02.
 
 > Os números de "retorno bruto" abaixo (retorno em outro dia, D+1 a D+7; média 18,4%) são **só descritivos**, para conferir volume e distribuição. Nenhum efeito é afirmado aqui: o efeito ajustado, com incerteza e controle de confusão, é o Passo 6.
 

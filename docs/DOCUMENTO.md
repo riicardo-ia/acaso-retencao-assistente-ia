@@ -27,11 +27,17 @@ Os efeitos de todos os fatores, a qualidade da resposta e o que os dados permite
 | Quem é o usuário | `hashed_ip` (não há login) | IP + navegador: 20,2%; IPs unidos pela conversa: 18,1% |
 | O que é "voltar" | usar em **outro dia local**, D+1 a D+7 (o PDF fala em "em que fuso horário conta um dia") | nova sessão no mesmo dia já contando: **28,1%**, a premissa que mais pesa |
 | O que conta como uso | cada resposta do assistente (só o assistente tem horário) | só conversa nova: 17,1% |
-| Fuso | São Paulo | UTC: 19,6% |
+| Fuso | São Paulo para todo o Brasil | UTC: 19,6%. O Brasil tem 4 fusos: no Amazonas e no Acre, o dia vira 1 ou 2 horas mais tarde que em São Paulo |
 | Período | base inteira, sem os primeiros 14 dias (falso "novo") e sem os últimos 8 (janela incompleta) | sem cortes: até 18,7% |
 | Base | pública, sem as conversas tóxicas | o retorno medido é um **limite inferior** |
+| Sessão | só como sensibilidade: pausa de 15, 30 ou 60 min | 33,4%, 28,1% ou 24,6% se nova sessão contasse como volta |
+| Janela | 7 dias, como na pergunta | 15,8% com 3 dias; 19,8% com 14 |
+| Tema | da conversa inteira da 1ª conversa, entre 11 temas fixos | depende do classificador: estável (κ = 0,95) e confirmado em 5 de 5 hipóteses |
+| Engajamento do 1º dia | fora do modelo, como consequência (mediador) | controlá-lo apagaria o efeito de uma boa 1ª experiência |
+| Amostra mínima | 30 pessoas para mostrar um número; 99% de confiança nas frases | abaixo disso, o número oscila demais por acaso |
+| País | `country` inferido do IP | conversas por VPN entram ou saem do Brasil; não há dado para medir |
 
-Tabela completa: [`bdr/BDR-001`](bdr/BDR-001-definicoes-de-uso-e-retorno.md).
+Opções consideradas em cada uma: [`bdr/BDR-001`](bdr/BDR-001-definicoes-de-uso-e-retorno.md).
 
 ## 3. O dashboard
 
@@ -59,7 +65,7 @@ Sobe com `docker compose up --build` e abre em `http://localhost:8000`. É um **
 
 **Amostra pequena:** com menos de 30 pessoas, a API não devolve nenhum número do grupo, nem a contagem. A tela mostra "menos de 30" e "amplie o recorte" no recorte, deixa o mês sem ponto e escreve "poucas pessoas" no lugar da barra.
 
-**Indicadores que só fizeram sentido depois de olhar os dados** (AN-3.1-08), já no dashboard:
+**Indicadores que só fizeram sentido depois de olhar os dados**, já no dashboard:
 - retorno por tema da 1ª conversa;
 - a fatia de quem chega "só testando" ou "pedindo imagem";
 - retorno por dispositivo;
@@ -160,14 +166,4 @@ Todos rodam com ruff e mypy como gate.
 
 ## 7. Uso de IA
 
-Usei o **Claude Code (Anthropic)** como par de desenvolvimento na leitura do desafio, no discovery, no código da análise, da carga, da API e das telas, e na redação dos documentos. Usei o **gpt-5.4 e o gpt-5.4-nano (OpenAI)**, via LangChain, só para classificar o tema das conversas.
-
-Conferi e corrigi o que a IA propôs. Alguns exemplos:
-- **Definição de retorno:** a IA propôs "nova sessão depois de 30 minutos". Na revisão, o texto do PDF ("em que fuso horário conta um dia") mostrou que o retorno é por dia de calendário, e a definição mudou de 28,1% para 18,4%.
-- **Tema:** classificar pela 1ª mensagem foi descartado em favor da conversa inteira.
-- **Classificador:** o nano foi trocado pelo gpt-5.4 depois que revisei os padrões de discordância.
-- **Recusa:** a variável "alguma recusa no 1º dia" foi descartada por criar um efeito falso (ela sobe com o número de respostas).
-- **Validação:** uma decisão de validação que a IA tomou sem me consultar foi revertida.
-- **Números:** conferi os números das telas contra os relatórios da análise; a carga também confere, a cada execução, o retorno calculado em SQL contra o calculado em Python.
-
-Dediquei cerca de **[N] horas** ao desafio.
+Usei o Claude Code (Anthropic) como par de desenvolvimento em todas as etapas: discovery, análise, código da carga, da API e das telas, e redação dos documentos. Usei a API da OpenAI (gpt-5.4 e gpt-5.4-nano, via LangChain) só para classificar o tema das conversas. Conferi tudo o que a IA gerou, da análise à tela, e corrigi o que não se sustentava. A correção mais importante foi no tema: a IA classificava cada conversa pela primeira mensagem, que muitas vezes é só um "oi" antes do pedido real, e passei a classificar pela conversa inteira. Também corrigi a definição de retorno (a proposta de "nova sessão depois de 30 minutos" virou uso em outro dia de calendário, como o enunciado indica, e o número foi de 28,1% para 18,4%), descartei a variável "alguma recusa no 1º dia" (criava um efeito falso, porque sobe com o número de respostas), troquei o classificador menor pelo maior depois de revisar as discordâncias e defini a chave da conversa pelo primeiro `turn_identifier`, porque o `conversation_hash` se repete entre pessoas diferentes. A cada carga, o retorno calculado em SQL é comparado com o calculado em Python, e a carga não é publicada se divergirem. Dediquei cerca de 14 horas ao desafio.

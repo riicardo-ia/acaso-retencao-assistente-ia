@@ -1,7 +1,6 @@
 # Passo 2 · Definições e sensibilidade do retorno em 7 dias
 
 **Reprodução:** `python -m analise.sensibilidade` · definições em `analise/definicoes.py`, travadas por `tests/test_definicoes.py`.
-**Requisitos:** AN-2-02, AN-3.1-01, AN-2.3-01/02.
 
 ## Revisão 1: retorno por dia de calendário
 
@@ -42,7 +41,7 @@ Na revisão dos passos, o texto do PDF §2.3 ("em que fuso horário **conta um d
 - **O fuso agora importa** (+1,2 pp em UTC): quem usa perto da meia-noite muda de dia.
 - **A definição de usuário move pouco** (−0,3 a +1,8 pp). Somar o user-agent *aumenta* o retorno porque divide IPs compartilhados em vários "usuários" muito ativos.
 - **Cortes de censura e IPs anômalos quase não mexem no total.**
-- **Coortes semanais são pequenas:** 16 de 53 semanas têm menos de 30 novos usuários; o desvio-padrão entre semanas (6,1 pp) é próximo do que o acaso produz com ~43 pessoas por semana (≈ 5,9 pp). Isso condiciona o Passo 6 (AN-3.2-03).
+- **Coortes semanais são pequenas:** 16 de 53 semanas têm menos de 30 novos usuários; o desvio-padrão entre semanas (6,1 pp) é próximo do que o acaso produz com ~43 pessoas por semana (≈ 5,9 pp). Isso condiciona o Passo 6.
 
 ## Decisão
 

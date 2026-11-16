@@ -1,7 +1,7 @@
 # Passo 4 · Análise exploratória
 
 **Reprodução:** `python -m analise.tabela && python -m analise.eda` (gráficos em `img/`, números impressos).
-**Requisito:** AN-3.1-05: "como o **uso** se distribui no tempo, por modelo, idioma, tema e tamanho de conversa", só com os gráficos que levaram a uma conclusão. Tudo aqui é **descritivo**; efeitos com ajuste de confusão são o Passo 6.
+**Pergunta do enunciado:** "como o **uso** se distribui no tempo, por modelo, idioma, tema e tamanho de conversa", só com os gráficos que levaram a uma conclusão. Tudo aqui é **descritivo**; efeitos com ajuste de confusão são o Passo 6.
 
 Cada gráfico de distribuição compara duas leituras do mesmo uso: **% das conversas** (laranja) e **% dos usuários**, pela 1ª conversa de cada um (azul). A diferença entre as duas é o tamanho da distorção causada por usuários intensos.
 

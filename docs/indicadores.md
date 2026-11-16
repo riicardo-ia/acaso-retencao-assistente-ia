@@ -131,3 +131,52 @@ SELECT fator, rotulo, nivel, referencia, n, retorno_pct, retorno_ref_pct,
        bruto_pp, ajustado_pp, ajustado_lo, ajustado_hi, p
 FROM mart.efeitos;
 ```
+
+## 6. O GPT-4 faz diferença? (Análise completa)
+
+| | |
+|---|---|
+| Definição | diferença no retorno entre quem teve a 1ª conversa com GPT-4 e com GPT-3.5 |
+| Fórmula | diferença de proporções em cada regime de oferta (IC de Newcombe) e diferença ponderada pelo inverso do escore de propensão (IPW, IC por bootstrap) |
+| Denominador | pessoas de cada regime; no IPW, as do período em que o GPT-4 existia |
+| Período | GPT-4 opcional: abr–jun/23 e nov/23; GPT-4 padrão: dez/23–abr/24 |
+| Amostra pequena | todos os grupos têm mais de 30 pessoas; um grupo menor não apareceria |
+
+Calculado na carga (`analise/efeitos.py`) e gravado em `mart.gpt4_selecao`:
+
+```sql
+SELECT metodo, detalhe, dif_pp, lo, hi, n FROM mart.gpt4_selecao;
+```
+
+## 7. A semana mudou por perfil ou por taxa? (Análise completa)
+
+| | |
+|---|---|
+| Definição | quanto da mudança no retorno de uma semana, contra as 4 anteriores, vem do perfil de quem chegou e quanto vem do retorno dentro de cada perfil |
+| Fórmula | decomposição de Kitagawa: perfil = Σ (peso na semana − peso antes) × retorno médio; taxa = Σ (retorno na semana − retorno antes) × peso médio |
+| Denominador | pessoas novas da semana e das 4 semanas anteriores |
+| Período | semana de 20/11/2023 contra 23/10 a 19/11/2023 |
+| Amostra pequena | grupo com menos de 30 pessoas antes ou na semana sai sem números da API; a tela avisa que, com ~45 pessoas por semana, a variação pode ser acaso (teste de homogeneidade entre as semanas, p = 0,21) |
+
+Calculado na carga (`analise/semana.py`) e gravado em `mart.semana_decomposicao`:
+
+```sql
+SELECT segmento, round(sum(mix_pp), 1) AS mix_pp, round(sum(taxa_pp), 1) AS taxa_pp
+FROM mart.semana_decomposicao GROUP BY segmento ORDER BY segmento;
+```
+
+## 8. Sensibilidade às regras de contagem (Análise completa)
+
+| | |
+|---|---|
+| Definição | o retorno em 7 dias recalculado trocando uma regra de contagem por vez (o que é voltar, quem é a pessoa, janela, fuso, cortes) |
+| Fórmula | a do indicador 1, com a regra trocada |
+| Denominador | pessoas elegíveis sob cada regra |
+| Período | base inteira |
+| Amostra pequena | não se aplica (todas as regras têm mais de 2.000 pessoas) |
+
+Calculado na carga (`analise/sensibilidade.py`) e gravado em `mart.sensibilidade`:
+
+```sql
+SELECT cenario, usuarios, voltaram, retorno_pct, ic95 FROM mart.sensibilidade;
+```

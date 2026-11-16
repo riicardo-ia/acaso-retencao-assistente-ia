@@ -13,7 +13,7 @@ O PDF pede um dashboard com frontend, backend e base analítica, que suba do zer
 | Power BI / Looker | Fora da AWS; sem backend nem endpoints próprios; não sobe com `docker compose` |
 | Amazon QuickSight | Na AWS, mas não roda localmente nem expõe a API que o PDF pede |
 | Streamlit / notebook publicado | O PDF pede dashboard, não notebook; mistura cálculo e tela |
-| Next.js + React | Funciona, mas acrescenta build e dependências sem caso real que as justifique (3 telas, sem estado complexo) |
+| Next.js + React | Funciona, mas acrescenta build e dependências sem caso real que as justifique (2 telas, sem estado complexo) |
 | **FastAPI + HTML/CSS/JS sem dependências + Postgres** | Escolhida |
 
 ## Decisão
