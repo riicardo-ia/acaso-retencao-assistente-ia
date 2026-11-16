@@ -1,0 +1,19 @@
+# segredos
+.env
+
+# ambiente e caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# dados: a camada bruta contém texto de conversas (dados pessoais) e nunca vai para o git
+data/raw/
+data/tmp/
+logs/
+*.dump
+
+# material local que não vai para o repositório (enunciado, notas de trabalho, referências)
+_local/
