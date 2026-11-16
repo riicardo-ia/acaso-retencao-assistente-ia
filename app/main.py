@@ -1,8 +1,8 @@
 """API do dashboard: fina, só faz SELECT no schema mart; nenhuma regra de negócio fica aqui.
 
 Duas telas:
-- Explorar (self-host BI): números descritivos com os 5 filtros principais e frases por regra;
-- Análise completa: os resultados estatísticos da análise, fixos (sem filtros).
+- A resposta: os resultados estatísticos da análise, fixos (sem filtros);
+- Explorar (self-host BI): números descritivos com os 5 filtros principais e frases por regra.
 Cada resposta traz a procedência e a consulta SQL de cada número.
 """
 
@@ -87,7 +87,27 @@ GROUP BY r.tema ORDER BY pct_pessoas DESC""",
        array_agg(DISTINCT tema) AS tema, array_agg(DISTINCT modelo) AS modelo
 FROM mart.vw_explorar""",
     "geral": "SELECT usuarios, voltaram, retorno_pct, ic_lo, ic_hi FROM mart.vw_retorno_geral",
-    "coortes": "SELECT semana, novos, voltaram, retorno_pct, ic_lo, ic_hi FROM mart.mv_coortes_semanais ORDER BY semana",
+    # faixa do acaso: onde a semana cairia só por sorte se o retorno fosse o da base inteira
+    "coortes": """SELECT c.semana, c.novos, c.voltaram, c.retorno_pct, c.ic_lo, c.ic_hi,
+       round(g.retorno_pct - 196 * sqrt(g.retorno_pct / 100 * (1 - g.retorno_pct / 100) / c.novos), 1) AS acaso_lo,
+       round(g.retorno_pct + 196 * sqrt(g.retorno_pct / 100 * (1 - g.retorno_pct / 100) / c.novos), 1) AS acaso_hi
+FROM mart.mv_coortes_semanais c CROSS JOIN mart.vw_retorno_geral g
+ORDER BY c.semana""",
+    # barras dos três achados: retorno de cada grupo, com a margem de erro
+    "achados": """WITH grupos AS (
+    SELECT 'chegada' AS achado,
+           CASE WHEN tema IN ('saudacao_teste', 'imagem_midia', 'burlar_regras') THEN tema
+                ELSE 'pedido_real' END AS grupo,
+           retornou
+    FROM mart.vw_explorar
+    UNION ALL SELECT 'dispositivo', dispositivo, retornou FROM mart.vw_explorar
+    UNION ALL SELECT 'modelo', modelo, retornou FROM mart.vw_explorar
+)
+SELECT achado, grupo, count(*) AS n, count(*) FILTER (WHERE retornou) AS voltaram,
+       round(100.0 * count(*) FILTER (WHERE retornou) / count(*), 1) AS retorno_pct,
+       mart.wilson(count(*) FILTER (WHERE retornou), count(*), -1) AS ic_lo,
+       mart.wilson(count(*) FILTER (WHERE retornou), count(*), 1)  AS ic_hi
+FROM grupos GROUP BY achado, grupo ORDER BY achado, grupo""",
     "efeitos": """SELECT fator, rotulo, nivel, referencia, natureza, n, retorno_pct, retorno_ref_pct,
        bruto_pp, bruto_lo, bruto_hi, ajustado_pp, ajustado_lo, ajustado_hi, p
 FROM mart.efeitos""",
@@ -282,7 +302,7 @@ def explorar(
 
 @app.get("/api/analise")
 def analise() -> dict[str, Any]:
-    """Tela Análise completa: resultados estatísticos fixos (base inteira, sem filtros)."""
+    """Tela A resposta: resultados estatísticos fixos (base inteira, sem filtros)."""
     total = dados("semana_total")
     semana = (
         {
@@ -299,6 +319,7 @@ def analise() -> dict[str, Any]:
     )
     return {
         "geral": dados("geral")[0],
+        "achados": [protegido(a, a["n"]) for a in dados("achados")],
         "coortes": [protegido(c, c["novos"]) for c in dados("coortes")],
         "efeitos": [protegido(e, e["n"]) for e in dados("efeitos")],
         "gpt4": dados("gpt4"),
@@ -311,6 +332,7 @@ def analise() -> dict[str, Any]:
             k: SQL[k]
             for k in (
                 "geral",
+                "achados",
                 "coortes",
                 "efeitos",
                 "gpt4",

@@ -207,14 +207,15 @@ function desenharFiltros(op, f) {
 // ---------- telas ----------
 async function paginaExplorar(el, qs) {
   const f = lerFiltros(qs);
-  const d = await api("/api/explorar?" + new URLSearchParams(f));
+  const [d, resposta] = await Promise.all([api("/api/explorar?" + new URLSearchParams(f)), api("/api/analise")]);
   desenharFiltros(d.opcoes, f);
   const r = d.recorte, b = d.base;
   el.innerHTML = `
     <h1>Explorar</h1>
-    <p class="pergunta">Escolha um recorte nos filtros acima e veja quantas pessoas voltaram a usar o assistente em até 7 dias, como isso evoluiu e quais grupos voltam mais ou menos. Todos os números mudam com os filtros.</p>
+    <p class="pergunta">Escolha um recorte nos filtros acima e veja quantas pessoas voltaram a usar o assistente em até 7 dias, como isso evoluiu e quais grupos voltam mais ou menos. Todos os números abaixo da faixa-resumo mudam com os filtros.</p>
+    ${faixaResposta(resposta)}
     <div class="frases"><h2>O que este recorte mostra</h2><ul>${d.frases.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
-      <p class="nota">Frases geradas por regras fixas: uma diferença só é chamada de "confirmada" quando é maior que a margem de erro (com 99% de confiança). São comparações simples; para o efeito comparando pessoas parecidas, veja a <a href="#analise">Análise completa</a>.</p></div>
+      <p class="nota">Frases geradas por regras fixas: uma diferença só é chamada de "confirmada" quando é maior que a margem de erro (com 99% de confiança). São comparações simples; para o efeito comparando pessoas parecidas, veja <a href="#resposta">A resposta</a>.</p></div>
     <div class="grade g4">
       ${kpi("Voltaram em até 7 dias", r.suficiente ? P(r.retorno_pct) : "—", r.suficiente ? `margem de erro: ${FAIXA(r.ic_lo, r.ic_hi)}` : "amplie o recorte para ver o número", "destaque")}
       ${kpi("Pessoas no recorte", r.suficiente ? N(r.n) : `menos de ${d.n_min}`, "usaram o assistente pela 1ª vez no período")}
@@ -255,33 +256,117 @@ function cartaoGrupo(d, dim, classificacao) {
   </div>`;
 }
 
-// ---------- Análise completa: linguagem de negócio ("de cada 100 pessoas") ----------
+// ---------- A resposta: linguagem de negócio ("de cada 100 pessoas") ----------
 const C100 = (v) => n0.format(Math.round(v));                       // 18,4% -> "18" de cada 100
 const QTD100 = (pp) => `${C100(Math.abs(pp))} ${pp < 0 ? "a menos" : "a mais"} em cada 100`;
 const ENTRE100 = (lo, hi) => {
   const a = Math.round(Math.min(Math.abs(lo), Math.abs(hi))), b = Math.round(Math.max(Math.abs(lo), Math.abs(hi)));
   return lo < 0 && hi > 0 ? `algo entre ${Math.round(Math.abs(lo))} a menos e ${Math.round(hi)} a mais` : `algo entre ${Math.max(1, a)} e ${b}`;
 };
+const SINAL = (v) => { const r = Math.round(v); return (r > 0 ? "+" : r < 0 ? "−" : "") + n0.format(Math.abs(r)); };
+const SINAL1 = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + n1.format(Math.abs(v));
+const LIMITE = (v) => (Math.round(v) === 0 && v !== 0 ? SINAL1(v) : SINAL(v));  // −0,5 não vira "0"
 const comprovado = (e) => e.ajustado_lo > 0 || e.ajustado_hi < 0;
 const CONSIDERANDO = "mesmo considerando idioma, aparelho, horário, tema e época";
+const COR = { afasta: "var(--ruim)", aproxima: "var(--bom)", medida: "var(--atencao)", neutro: "var(--neutro)" };
+const LEGENDA = { afasta: "afasta", aproxima: "aproxima", medida: "efeito da forma de medir", neutro: "não faz diferença comprovada" };
+function grupoEfeito(e) {
+  if (!comprovado(e)) return "neutro";
+  if (e.fator === "faixa_horaria") return "medida";
+  return e.ajustado_pp < 0 ? "afasta" : "aproxima";
+}
 
-// Barras simples "voltam de cada 100" em HTML: se adaptam à largura (celular incluído).
+// Barras simples "voltam de cada 100" em HTML, com a margem de erro: se adaptam à largura (celular incluído).
 function barras100(itens, max = 30) {
+  const pos = (v) => (100 * Math.min(Math.max(v, 0), max)) / max;
   return `<div class="b100" role="img" aria-label="Voltam de cada 100 pessoas">${itens.map((it) => `
     <span class="nome">${esc(it.nome)}</span>
-    <span class="barra"><i style="width:${(100 * Math.min(it.valor, max)) / max}%;background:${it.cor || "var(--marca)"}"></i></span>
+    <span class="barra" tabindex="0" data-dica="${esc(`<b>${esc(it.nome)}</b><br>Voltam ${C100(it.valor)} de cada 100` + (it.lo != null ? `<br>margem de erro: entre ${C100(it.lo)} e ${C100(it.hi)}` : ""))}"><i style="width:${pos(it.valor)}%;background:${it.cor || "var(--marca)"}"></i>${it.lo != null ? `<s style="left:${pos(it.lo)}%;width:${pos(it.hi) - pos(it.lo)}%"></s>` : ""}</span>
     <b>${C100(it.valor)}</b>`).join("")}</div>`;
 }
 
-// Lista "o que faz diferença": barra do tamanho do efeito, sem eixo nem jargão.
-function listaFatores(itens, cor) {
-  const max = Math.max(1, ...itens.map((e) => Math.abs(e.ajustado_pp)));
-  return `<div class="fatores">${itens.map((e) => `
-    <div class="fator" tabindex="0" data-dica="${esc(`<b>${esc(nomeEfeito(e))}</b><br>Voltam ${C100(e.retorno_pct)} de cada 100 (${N(e.n)} pessoas). Comparação: ${esc(rot(e.referencia))}, ${C100(e.retorno_ref_pct)} de cada 100.`)}">
-      <span class="nome">${esc(nomeEfeito(e))}</span>
-      <span class="barra"><i style="width:${(100 * Math.abs(e.ajustado_pp)) / max}%;background:${cor}"></i></span>
-      <span class="valor"><b>${QTD100(e.ajustado_pp)}</b><br><small>${ENTRE100(e.ajustado_lo, e.ajustado_hi)}</small></span>
-    </div>`).join("")}</div>`;
+// O que mais pesa: cada efeito com a margem de erro (ponto e linha), ordenado pelo tamanho.
+function graficoPeso(itens) {
+  const W = 760, lh = 34, m = { l: 230, r: 120, t: 28, b: 28 };
+  const H = m.t + m.b + lh * itens.length;
+  const a = Math.floor(Math.min(-5, ...itens.map((e) => e.ajustado_lo)) / 5) * 5, b = Math.ceil(Math.max(5, ...itens.map((e) => e.ajustado_hi)) / 5) * 5;
+  const x = (v) => m.l + ((v - a) / (b - a)) * (W - m.l - m.r);
+  let s = `<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="O que mais pesa no retorno">`;
+  for (let v = a; v <= b; v += 5) s += `<line class="grade" x1="${x(v)}" x2="${x(v)}" y1="${m.t}" y2="${H - m.b}"/><text x="${x(v)}" y="${H - 8}" text-anchor="middle">${SINAL(v)}</text>`;
+  s += `<line x1="${x(0)}" x2="${x(0)}" y1="${m.t - 6}" y2="${H - m.b}" stroke="var(--texto)" stroke-width="1.2"/>`;
+  s += `<text x="${x(0) - 8}" y="${m.t - 12}" text-anchor="end">← voltam menos</text><text x="${x(0) + 8}" y="${m.t - 12}">voltam mais →</text>`;
+  itens.forEach((e, i) => {
+    const yc = m.t + i * lh + lh / 2, g = grupoEfeito(e), cor = COR[g];
+    s += `<text class="rot" x="${m.l - 10}" y="${yc + 4}" text-anchor="end">${esc(nomeEfeito(e))}</text>`;
+    s += `<line x1="${x(e.ajustado_lo)}" x2="${x(e.ajustado_hi)}" y1="${yc}" y2="${yc}" stroke="${cor}" stroke-width="4" stroke-linecap="round" opacity=".4"/>`;
+    s += `<circle cx="${x(e.ajustado_pp)}" cy="${yc}" r="6.5" fill="${cor}" stroke="var(--cartao)" stroke-width="1.5"/>`;
+    s += `<text x="${W - m.r + 12}" y="${yc + 4}" style="fill:var(--texto);font-weight:600">${g === "neutro" ? "≈ 0" : SINAL(e.ajustado_pp)}</text><text x="${W - m.r + 52}" y="${yc + 4}">${LIMITE(e.ajustado_lo)} a ${LIMITE(e.ajustado_hi)}</text>`;
+    const txt = `<b>${esc(nomeEfeito(e))}</b><br>${g === "neutro" ? "Não faz diferença comprovada" : QTD100(e.ajustado_pp)}, ${CONSIDERANDO}.<br>Margem de erro: ${ENTRE100(e.ajustado_lo, e.ajustado_hi)} em cada 100.<br>Voltam ${C100(e.retorno_pct)} de cada 100 (${N(e.n)} pessoas); comparação: ${esc(rot(e.referencia))}, ${C100(e.retorno_ref_pct)}.`;
+    s += `<rect class="alvo" tabindex="0" x="0" y="${yc - lh / 2}" width="${W}" height="${lh}" aria-label="${esc(nomeEfeito(e))}: ${SINAL(e.ajustado_pp)} em cada 100" data-dica="${esc(txt)}"/>`;
+  });
+  return s + "</svg>";
+}
+
+// Quanto da diferença vinha do perfil: a diferença que se vê (círculo vazio) e a que sobra comparando pessoas parecidas (cheio).
+function parteDoPerfil(e) {
+  if (Math.abs(e.bruto_pp) < 2) return "não há diferença para explicar";
+  const parte = (e.bruto_pp - e.ajustado_pp) / e.bruto_pp;
+  if (parte <= 0.15) return "quase nada vinha do perfil";
+  if (parte < 0.4) return "uma parte menor vinha do perfil";
+  if (parte < 0.6) return "cerca de metade vinha do perfil";
+  if (parte < 0.85) return "a maior parte vinha do perfil";
+  return "quase tudo vinha do perfil";
+}
+function graficoPerfil(itens) {
+  const W = 1150, lh = 32, m = { l: 330, r: 290, t: 10, b: 28 };
+  const H = m.t + m.b + lh * itens.length;
+  const ext = itens.flatMap((e) => [e.bruto_pp, e.ajustado_pp]);
+  const a = Math.floor(Math.min(-5, ...ext) / 5) * 5, b = Math.ceil(Math.max(5, ...ext) / 5) * 5;
+  const x = (v) => m.l + ((v - a) / (b - a)) * (W - m.l - m.r);
+  let s = `<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="Quanto da diferença vinha do perfil de quem chega">`;
+  for (let v = a; v <= b; v += 5) s += `<line class="grade" x1="${x(v)}" x2="${x(v)}" y1="${m.t}" y2="${H - m.b}"/><text x="${x(v)}" y="${H - 8}" text-anchor="middle">${SINAL(v)}</text>`;
+  s += `<line x1="${x(0)}" x2="${x(0)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--texto)" stroke-width="1.2"/>`;
+  itens.forEach((e, i) => {
+    const yc = m.t + i * lh + lh / 2;
+    s += `<text class="rot" x="${m.l - 10}" y="${yc + 4}" text-anchor="end">${esc(nomeEfeito(e))}</text>`;
+    s += `<line x1="${x(e.bruto_pp)}" x2="${x(e.ajustado_pp)}" y1="${yc}" y2="${yc}" stroke="var(--neutro)" stroke-width="2"/>`;
+    s += `<circle cx="${x(e.bruto_pp)}" cy="${yc}" r="6" fill="var(--cartao)" stroke="var(--marca)" stroke-width="2"/>`;
+    s += `<circle cx="${x(e.ajustado_pp)}" cy="${yc}" r="6" fill="var(--marca)"/>`;
+    s += `<text x="${W - m.r + 12}" y="${yc + 4}">${parteDoPerfil(e)}</text>`;
+    const txt = `<b>${esc(nomeEfeito(e))}</b><br>Comparando todo mundo: ${QTD100(e.bruto_pp)}.<br>Comparando pessoas parecidas: ${QTD100(e.ajustado_pp)}.<br>${parteDoPerfil(e)[0].toUpperCase() + parteDoPerfil(e).slice(1)}.`;
+    s += `<rect class="alvo" tabindex="0" x="0" y="${yc - lh / 2}" width="${W}" height="${lh}" aria-label="${esc(nomeEfeito(e))}: ${parteDoPerfil(e)}" data-dica="${esc(txt)}"/>`;
+  });
+  return s + "</svg>";
+}
+
+// Retorno semana a semana, com a faixa do acaso (onde a semana cairia só por sorte) e a semana analisada em destaque.
+function graficoSemanas(coortes, media, destaque) {
+  const W = 1100, H = 300, m = { l: 44, r: 16, t: 16, b: 30 };
+  const ok = coortes.filter((c) => c.suficiente);
+  const topo = Math.ceil(Math.max(30, ...ok.map((c) => Math.max(c.acaso_hi, c.retorno_pct))) / 10) * 10;
+  const x = (i) => m.l + (i * (W - m.l - m.r)) / Math.max(1, coortes.length - 1);
+  const y = (v) => m.t + (H - m.t - m.b) * (1 - Math.max(0, v) / topo);
+  let s = `<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="Retorno semana a semana">`;
+  for (let v = 0; v <= topo; v += passoEixo(topo)) s += `<line class="grade" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${v}%</text>`;
+  const idx = coortes.map((c, i) => [c, i]).filter(([c]) => c.suficiente);
+  if (idx.length > 1) {
+    const banda = idx.map(([c, i]) => `${x(i)},${y(c.acaso_hi)}`).concat(idx.slice().reverse().map(([c, i]) => `${x(i)},${y(c.acaso_lo)}`)).join(" ");
+    s += `<polygon points="${banda}" fill="var(--fundo)" stroke="var(--linha)"/>`;
+    s += `<polyline points="${idx.map(([c, i]) => `${x(i)},${y(c.retorno_pct)}`).join(" ")}" fill="none" stroke="var(--marca-clara)" stroke-width="1.5"/>`;
+  }
+  s += `<line class="media" x1="${m.l}" x2="${W - m.r}" y1="${y(media)}" y2="${y(media)}"/>`;
+  coortes.forEach((c, i) => {
+    const alvo = destaque && String(c.semana).slice(0, 10) === String(destaque).slice(0, 10);
+    if (i % 6 === 0) s += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${DATA(c.semana).slice(0, 5)}/${String(c.semana).slice(2, 4)}</text>`;
+    if (c.suficiente) {
+      const fora = c.retorno_pct < c.acaso_lo || c.retorno_pct > c.acaso_hi;
+      s += `<circle cx="${x(i)}" cy="${y(c.retorno_pct)}" r="${alvo ? 7 : 4}" fill="${alvo ? "var(--ruim)" : fora ? "var(--atencao)" : "var(--marca)"}" stroke="var(--cartao)" stroke-width="1.5"/>`;
+      if (alvo) s += `<text x="${x(i)}" y="${y(c.retorno_pct) + 22}" text-anchor="middle" style="fill:var(--ruim);font-weight:600">${DATA(c.semana).slice(0, 5)}</text>`;
+    }
+    const txt = `<b>Semana de ${DATA(c.semana)}</b><br>` + (c.suficiente ? `${N(c.novos)} pessoas chegaram · ${N(c.voltaram)} voltaram<br>Retorno: <b>${P(c.retorno_pct)}</b><br>Faixa do acaso: ${FAIXA(Math.max(0, c.acaso_lo), c.acaso_hi)}` : POUCAS(30));
+    s += `<rect class="alvo" tabindex="0" x="${x(i) - 8}" y="${m.t}" width="16" height="${H - m.t - m.b}" aria-label="Semana de ${DATA(c.semana)}" data-dica="${esc(txt)}"/>`;
+  });
+  return s + "</svg>";
 }
 
 const ACHADOS = [
@@ -292,72 +377,101 @@ const ACHADOS = [
   { id: "celular", titulo: "Quem usa pelo celular volta menos",
     decisao: "Revisar a experiência no celular (velocidade, teclado, respostas longas demais para a tela) e testar uma versão melhorada em A/B." },
 ];
+const SEGMENTOS = { chegada: "Pedido real × só testa ou pede imagem", dispositivo: "Computador × celular", gpt4: "GPT-4 × GPT-3.5" };
 
-async function paginaAnalise(el) {
+// Leitura comum às duas telas: os efeitos válidos e os grupos de cada achado.
+function lerResposta(d) {
+  const ef = d.efeitos.filter((e) => e.natureza !== "mediador" && e.suficiente && e.ajustado_pp != null);
+  const pega = (nivel, fator) => ef.find((e) => e.nivel === nivel && (!fator || e.fator === fator));
+  const grupo = (achado, g) => d.achados.find((a) => a.achado === achado && a.grupo === g) || {};
+  const afasta = ef.filter((e) => grupoEfeito(e) === "afasta").sort((a, b) => a.ajustado_pp - b.ajustado_pp);
+  return { ef, pega, grupo, afasta };
+}
+
+// Faixa-resumo no topo do Explorar: a resposta da base inteira, que não muda com os filtros.
+function faixaResposta(d) {
+  const { pega, afasta } = lerResposta(d);
+  const gpt4 = pega("True", "gpt4");
+  return `<div class="resumo-resposta"><div class="titulo"><b>A resposta, em resumo</b> <span>(base inteira, não muda com os filtros)</span></div>
+    <ul><li><b>${C100(d.geral.retorno_pct)} de cada 100</b> pessoas voltam em até 7 dias.</li>
+      <li><b>Afasta</b>, em cada 100: ${afasta.slice(0, 3).map((e) => `${esc(nomeEfeito(e))} <b>${SINAL(e.ajustado_pp)}</b>`).join(" · ")}.</li>
+      ${gpt4 && !comprovado(gpt4) ? "<li>Usar GPT-4 <b>não faz diferença comprovada</b>.</li>" : ""}</ul>
+    <a href="#resposta">Ver a resposta completa</a></div>`;
+}
+
+async function paginaResposta(el) {
   $("#filtros").hidden = true;
   const d = await api("/api/analise");
   const g = d.geral;
-  const ef = d.efeitos.filter((e) => e.natureza !== "mediador" && e.suficiente && e.ajustado_pp != null);
-  const pega = (nivel, fator) => ef.find((e) => e.nivel === nivel && (!fator || e.fator === fator));
+  const { ef, pega, grupo, afasta } = lerResposta(d);
   const t = Object.fromEntries(d.testes.map((x) => [x.nome, x]));
   const teste = pega("saudacao_teste"), imagem = pega("imagem_midia"), gpt4 = pega("True", "gpt4"), celular = pega("celular");
 
+  // "O que mais pesa": tudo o que tem efeito comprovado, mais o GPT-4 (a pergunta mais comum); o resto vira lista.
+  const peso = ef.filter((e) => comprovado(e) || e.fator === "gpt4").sort((a, b) => Math.abs(b.ajustado_pp) - Math.abs(a.ajustado_pp));
+  const neutros = ef.filter((e) => !peso.includes(e)).sort((a, b) => Math.abs(b.ajustado_pp) - Math.abs(a.ajustado_pp));
+  const perfil = ef.filter((e) => Math.abs(e.bruto_pp) >= 5 || e.fator === "gpt4").sort((a, b) => Math.abs(b.bruto_pp) - Math.abs(a.bruto_pp));
+  const ipw = d.gpt4.find((x) => x.metodo === "IPW");
+  const smd = ipw ? (ipw.detalhe.match(/([\d.]+)\s*->\s*([\d.]+)/) || []).slice(1).map(Number) : [];
+  const diag = t.modelo_efeitos;
+  const diagnostico = (diag ? `Diagnóstico do modelo: ${N(diag.n)} pessoas; pseudo-R² = ${n0.format(Math.round(diag.valor * 1000) / 1000)} (a primeira experiência explica pouco do retorno, o que é esperado com tão pouca informação por pessoa).` : "")
+    + (smd.length === 2 ? ` No IPW, o maior desequilíbrio entre os grupos cai de ${n1.format(smd[0])} para ${n1.format(smd[1])} desvio-padrão.` : "");
+
   const cardAchado = (a) => {
     let barras = "", efeito = "";
+    const it = (nome, gr, cor) => ({ nome, valor: gr.retorno_pct, lo: gr.ic_lo, hi: gr.ic_hi, cor });
     if (a.id === "chegada") {
       barras = barras100([
-        { nome: "Só cumprimenta ou testa", valor: teste.retorno_pct, cor: "var(--ruim)" },
-        { nome: "Pede imagem, vídeo ou áudio", valor: imagem.retorno_pct, cor: "var(--ruim)" },
-        { nome: "Média de todos", valor: g.retorno_pct, cor: "var(--neutro)" },
+        it("Só cumprimenta ou testa", grupo("chegada", "saudacao_teste"), "var(--ruim)"),
+        it("Pede imagem, vídeo ou áudio", grupo("chegada", "imagem_midia"), "var(--ruim)"),
+        it("Chega com um pedido real", grupo("chegada", "pedido_real"), "var(--neutro)"),
       ]);
       efeito = `Faz diferença: <b>${QTD100(teste.ajustado_pp)}</b> e <b>${QTD100(imagem.ajustado_pp)}</b>, ${CONSIDERANDO}. São ${C100(100 * (teste.n + imagem.n) / g.usuarios)} de cada 100 pessoas que chegam.`;
     } else if (a.id === "gpt4") {
-      barras = barras100([
-        { nome: "1ª conversa com GPT-4", valor: gpt4.retorno_pct },
-        { nome: "1ª conversa com GPT-3.5", valor: gpt4.retorno_ref_pct, cor: "var(--marca-clara)" },
-      ]);
+      barras = barras100([it("1ª conversa com GPT-4", grupo("modelo", "GPT-4")), it("1ª conversa com GPT-3.5", grupo("modelo", "GPT-3.5"), "var(--marca-clara)")]);
       efeito = `Não faz diferença comprovada, ${CONSIDERANDO} (${ENTRE100(gpt4.ajustado_lo, gpt4.ajustado_hi)} em cada 100). E não é porque “quem escolhe GPT-4 já é mais fiel”: medimos isso também (abaixo).`;
     } else {
-      barras = barras100([
-        { nome: "Celular", valor: celular.retorno_pct, cor: "var(--ruim)" },
-        { nome: "Computador", valor: celular.retorno_ref_pct, cor: "var(--neutro)" },
-      ]);
+      barras = barras100([it("Celular", grupo("dispositivo", "celular"), "var(--ruim)"), it("Computador", grupo("dispositivo", "computador"), "var(--neutro)")]);
       efeito = `Faz diferença: <b>${QTD100(celular.ajustado_pp)}</b> (${ENTRE100(celular.ajustado_lo, celular.ajustado_hi)}), ${CONSIDERANDO}.`;
     }
-    return `<div class="cartao achado"><h2>${a.titulo}</h2><p class="ajuda">Voltaram em até 7 dias, de cada 100 pessoas:</p>${barras}
+    return `<div class="cartao achado"><h2>${a.titulo}</h2><p class="ajuda">Voltaram em até 7 dias, de cada 100 pessoas (a linha fina é a margem de erro):</p>${barras}
       <p>${efeito}</p><div class="decisao"><b>O que fazer:</b> ${a.decisao}</div></div>`;
   };
 
-  const afasta = ef.filter((e) => comprovado(e) && e.ajustado_pp < 0).sort((a, b) => a.ajustado_pp - b.ajustado_pp);
-  const aproxima = ef.filter((e) => comprovado(e) && e.ajustado_pp > 0 && e.fator !== "faixa_horaria");
-  const medida = ef.filter((e) => comprovado(e) && e.fator === "faixa_horaria");
-  const neutros = ef.filter((e) => !comprovado(e)).sort((a, b) => Math.abs(b.ajustado_pp) - Math.abs(a.ajustado_pp));
-
   const regime = d.gpt4.filter((x) => x.metodo !== "IPW");
-  const ipw = d.gpt4.find((x) => x.metodo === "IPW");
-  const sw = d.semana || { grupos: [] };
-  const antes = sw.retorno_antes_pct, naSemana = sw.retorno_semana_pct;
-  const real = sw.grupos.find((s) => s.segmento === "chegada" && s.grupo === "pedido real" && s.suficiente);
-  const sem = sw.semana || null;
+  const sw = d.semana;
+  const real = sw ? sw.grupos.find((s) => s.segmento === "chegada" && s.grupo === "pedido real" && s.suficiente) : null;
+  const med = d.efeitos.filter((e) => e.natureza === "mediador" && e.suficiente);
+  const turnos = med.find((e) => e.fator === "turnos_exp1"), temas = med.find((e) => e.fator === "varios_temas");
 
   el.innerHTML = `
-    <h1>Análise completa</h1>
-    <p class="pergunta">O que faz uma pessoa que experimentou o assistente voltar a usá-lo em até 7 dias? Esta tela resume o que concluímos com toda a base: <b>${N(g.usuarios)} pessoas</b>, das quais <b>${C100(g.retorno_pct)} de cada 100 voltaram</b> em outro dia.</p>
-    <div class="grade g3">${ACHADOS.map(cardAchado).join("")}</div>
+    <h1>A resposta</h1>
+    <p class="pergunta">O que faz uma pessoa que experimentou o assistente voltar em até 7 dias, quanto pesa cada fator e quanto disso vinha do perfil de quem chega. Base: <b>${N(g.usuarios)} pessoas</b> que usaram o assistente pela primeira vez.</p>
 
-    <div class="cartao" style="margin-bottom:16px"><h2>O que faz diferença no retorno</h2>
-      <p class="ajuda">Para cada característica da primeira experiência, quantas pessoas a mais ou a menos voltam em cada 100, ${CONSIDERANDO}. Ordenado do maior para o menor efeito. O valor entre parênteses mostra a faixa provável.</p>
-      <div class="grade g2" style="margin:0">
-        <div><h3 class="bloco ruim">Afasta as pessoas</h3>${listaFatores(afasta, "var(--ruim)")}
-          ${aproxima.length ? `<h3 class="bloco bom">Aproxima as pessoas</h3>${listaFatores(aproxima, "var(--bom)")}` : ""}
-          ${medida.length ? `<h3 class="bloco atencao">Efeito da forma de medir, não do produto</h3>${listaFatores(medida, "var(--atencao)")}<p class="ajuda">Como contamos o retorno por dia, quem começa à noite e continua depois da meia-noite já conta como “voltou outro dia”. Não é algo que o produto controle.</p>` : ""}</div>
-        <div><h3 class="bloco neutro">Não faz diferença comprovada</h3>
-          <p class="ajuda">Pode até haver alguma diferença, mas ela é pequena demais para separar do acaso com estes dados.</p>
-          <ul class="chips">${neutros.map((e) => `<li data-dica="${esc(`<b>${esc(nomeEfeito(e))}</b><br>${QTD100(e.ajustado_pp)} (${ENTRE100(e.ajustado_lo, e.ajustado_hi)})`)}" tabindex="0">${esc(nomeEfeito(e))}</li>`).join("")}</ul></div>
+    <div class="grade g13">
+      <div class="cartao kpi destaque"><div class="rotulo">Voltam em até 7 dias</div><div class="valor">${C100(g.retorno_pct)} de cada 100</div><div class="det">margem de erro: entre ${C100(g.ic_lo)} e ${C100(g.ic_hi)} · ${N(g.usuarios)} pessoas</div>
+        <p class="det" style="margin-top:14px">Voltar = usar de novo em outro dia, até 7 dias depois do primeiro uso. Se voltar no mesmo dia contasse, seriam ${C100((d.sensibilidade.find((s) => s.cenario.startsWith("regra anterior")) || { retorno_pct: 28 }).retorno_pct)} de cada 100.</p></div>
+      <div class="cartao"><h2>O que mais pesa no retorno</h2>
+        <p class="ajuda">Quantas pessoas a mais ou a menos voltam, em cada 100, comparando pessoas parecidas em idioma, aparelho, horário, tema e época. A linha fina é a margem de erro: quando ela cruza o zero, não dá para afirmar que há diferença.</p>
+        ${graficoPeso(peso)}
+        <div class="legenda">${["afasta", "medida", "neutro"].concat(peso.some((e) => grupoEfeito(e) === "aproxima") ? ["aproxima"] : []).map((k) => `<span><i style="background:${COR[k]}"></i>${LEGENDA[k]}</span>`).join("")}</div>
+        <p class="ajuda" style="margin-top:10px"><b>Começou à noite</b> é efeito da forma de medir: quem começa às 23h e continua depois da meia-noite já conta como “voltou outro dia”. Não é algo que o produto controle.</p>
+        <p class="ajuda"><b>Também sem diferença comprovada:</b> ${neutros.map((e) => esc(nomeEfeito(e))).join(" · ")}.</p>
+        ${explicacao("Comparamos quem tem cada característica com quem não tem, mas entre pessoas parecidas em todo o resto. Assim, por exemplo, a diferença do celular não vem de quem usa celular pedir temas diferentes. A margem de erro mostra onde o efeito real deve estar; quando ela inclui o zero, não dá para afirmar que há diferença.",
+          `Regressão logística com todos os fatores e a época (regime de oferta do GPT-4) como controle; efeito marginal médio em pontos percentuais, intervalo de confiança de 95% pelo método delta, erros robustos (HC1). Turnos e número de temas no 1º dia ficam fora por serem consequência do engajamento (mediadores). Grupos com menos de 30 pessoas não aparecem. ${diagnostico}`, { "Efeitos": d.sql.efeitos, "Diagnóstico": d.sql.testes })}
       </div>
-      ${explicacao(`Comparamos quem tem cada característica com quem não tem, mas entre pessoas parecidas em todo o resto. Assim, por exemplo, a diferença do celular não vem de quem usa celular pedir temas diferentes. A faixa provável é a margem de erro: com esse número de pessoas, o efeito real deve estar dentro dela. Quando a faixa inclui o zero, não dá para afirmar que há diferença.`,
-        "Regressão logística com todos os fatores e a época (regime de oferta do GPT-4) como controle; efeito marginal médio em pontos percentuais, intervalo de confiança de 95% pelo método delta, erros robustos (HC1). Turnos e número de temas no 1º dia ficam fora por serem consequência do engajamento (mediadores). Grupos com menos de 30 pessoas não aparecem.", { "Efeitos": d.sql.efeitos })}
     </div>
+
+    <div class="cartao" style="margin-bottom:16px"><h2>Quanto da diferença vinha do perfil de quem chega</h2>
+      <p class="ajuda">Círculo vazio: a diferença que se vê comparando todo mundo. Círculo cheio: a diferença que sobra comparando pessoas parecidas. O que some entre os dois vinha do perfil de quem chega, não do assistente.</p>
+      ${graficoPerfil(perfil)}
+      <div class="legenda"><span><i style="background:var(--cartao);border:2px solid var(--marca);border-radius:50%"></i>comparando todo mundo</span><span><i style="background:var(--marca);border-radius:50%"></i>comparando pessoas parecidas</span></div>
+      <p class="achado-nota">Ainda não está provado que mudar a primeira experiência fará as pessoas voltarem. Por isso, cada decisão vem com um teste A/B.</p>
+      ${explicacao("A diferença “comparando todo mundo” mistura o efeito da característica com o perfil de quem a tem (tema, aparelho, idioma, horário e época). Comparando pessoas parecidas, sobra a parte que não se explica por esse perfil.", "Círculo vazio: diferença bruta de proporções; círculo cheio: efeito marginal médio da regressão logística (o mesmo do gráfico acima). Parte que vinha do perfil = (bruto − ajustado) ÷ bruto.", { "Efeitos": d.sql.efeitos })}
+    </div>
+
+    <h2 class="secao">Os três achados e o que fazer</h2>
+    <div class="grade g3">${ACHADOS.map(cardAchado).join("")}</div>
 
     <div class="grade g2">
       <div class="cartao"><h2>O GPT-4 faz diferença ou é quem escolhe?</h2>
@@ -368,22 +482,43 @@ async function paginaAnalise(el) {
           ${ipw ? `<tr><td>Comparando pessoas parecidas</td><td class="num">${ENTRE100(ipw.lo, ipw.hi)}</td></tr>` : ""}
         </table>
         <p class="ajuda" style="margin-top:10px">Todas as faixas vão de “alguns a menos” a “alguns a mais”: o efeito pode ser zero. E, como escolher ou não o GPT-4 dá o mesmo resultado, não há sinal de que “quem escolhe já volta mais”.</p>
-        ${explicacao("Se o efeito viesse de quem escolhe, ele apareceria quando o GPT-4 era opcional e sumiria quando todos usavam. Os dois resultados são iguais e próximos de zero.", `Diferença de proporções por regime de oferta (abr–jun/23 e nov/23: opcional; dez/23–abr/24: ~90% das conversas) e ponderação pelo inverso do escore de propensão (IPW) com época, horário, dia, dispositivo, idioma, tamanho da 1ª mensagem e tema${ipw ? ` (${esc(ipw.detalhe).replace("SMD máx.", "maior desequilíbrio entre grupos")})` : ""}; intervalos de 95% (Newcombe e bootstrap).`, { "GPT-4": d.sql.gpt4 })}
+        ${explicacao("Se o efeito viesse de quem escolhe, ele apareceria quando o GPT-4 era opcional e sumiria quando todos usavam. Os dois resultados são iguais e próximos de zero.", `Diferença de proporções por regime de oferta (abr–jun/23 e nov/23: opcional; dez/23–abr/24: ~90% das conversas) e ponderação pelo inverso do escore de propensão (IPW) com época, horário, dia, dispositivo, idioma, tamanho da 1ª mensagem e tema${smd.length === 2 ? ` (maior desequilíbrio entre grupos: ${n1.format(smd[0])} antes, ${n1.format(smd[1])} depois)` : ""}; intervalos de 95% (Newcombe e bootstrap).`, { "GPT-4": d.sql.gpt4 })}
       </div>
-      <div class="cartao"><h2>${sem ? `A semana de ${DATA(sem)}: por que o retorno caiu?` : "A semana analisada"}</h2>
-        <p class="ajuda">Voltaram em até 7 dias, de cada 100 pessoas:</p>
-        ${barras100([{ nome: "4 semanas anteriores", valor: antes, cor: "var(--neutro)" }, { nome: `Semana de ${sem ? DATA(sem).slice(0, 5) : ""}`, valor: naSemana, cor: "var(--ruim)" }])}
-        <p><b>Não mudou o tipo de pessoa que chegou</b>: ${real ? `${C100(real.peso_semana_pct)} de cada 100 chegaram com um pedido real, contra ${C100(real.peso_antes_pct)} antes` : "o perfil foi o mesmo"}. <b>Mudou o retorno de quem chegou</b>${real ? `: entre quem chegou com pedido real, ${C100(real.retorno_antes_pct)} de cada 100 voltavam; nessa semana, ${C100(real.retorno_semana_pct)}` : ""}.</p>
-        <p class="achado">Mas atenção: chegam cerca de 45 pessoas por semana, e com tão pouca gente o número oscila bastante por acaso. Olhando todas as semanas juntas, <b>não há diferença comprovada entre elas</b>. Para decidir, acompanhe a tendência de várias semanas, não uma semana isolada.</p>
-        ${explicacao("Separamos a queda em duas partes: a que viria de chegarem mais pessoas de um tipo que volta menos (perfil) e a que vem de cada tipo voltar menos do que antes (taxa). Quase toda a queda foi de taxa.", `Decomposição de Kitagawa contra as 4 semanas anteriores; diferença ${t.semana_analisada ? `${n1.format(t.semana_analisada.valor)} pp (IC 95% ${n1.format(t.semana_analisada.lo)} a ${n1.format(t.semana_analisada.hi)}; p = ${n1.format(t.semana_analisada.p)})` : ""}; teste qui-quadrado de homogeneidade entre as semanas com 30 pessoas ou mais${t.homogeneidade_semanas ? ` (p = ${n1.format(t.homogeneidade_semanas.p)})` : ""}.`, { "Antes e na semana": d.sql.semana_total, "Decomposição": d.sql.semana_segmentos, "Testes": d.sql.testes })}
+      <div class="cartao"><h2>${sw ? `A semana de ${DATA(sw.semana)}: por que o retorno caiu?` : "A semana analisada"}</h2>
+        ${sw ? `<p class="ajuda">Voltaram em até 7 dias, de cada 100 pessoas (a linha fina é a margem de erro):</p>
+        ${barras100([{ nome: "4 semanas anteriores", valor: sw.retorno_antes_pct, lo: sw.antes_lo, hi: sw.antes_hi, cor: "var(--neutro)" }, { nome: `Semana de ${DATA(sw.semana).slice(0, 5)}`, valor: sw.retorno_semana_pct, lo: sw.semana_lo, hi: sw.semana_hi, cor: "var(--ruim)" }])}
+        <p class="ajuda"><b>A queda de ${DATA(sw.semana).slice(0, 5)} veio de quem chegou ou de como as pessoas voltaram?</b> Em pontos de cada 100:</p>
+        <table><tr><th>Separando por</th><th class="num">Mudança no perfil de quem chegou</th><th class="num">Mudança no retorno dentro de cada perfil</th></tr>
+          ${sw.segmentos.map((s) => `<tr><td>${SEGMENTOS[s.segmento] || esc(s.segmento)}</td><td class="num">${SINAL1(s.mix_pp)}</td><td class="num"><b>${SINAL1(s.taxa_pp)}</b></td></tr>`).join("")}</table>
+        <p style="margin-top:10px"><b>Não mudou o tipo de pessoa que chegou</b>${real ? `: ${C100(real.peso_semana_pct)} de cada 100 chegaram com um pedido real, contra ${C100(real.peso_antes_pct)} antes` : ""}. <b>Mudou o retorno de quem chegou</b>${real ? `: entre quem chegou com pedido real, ${C100(real.retorno_antes_pct)} de cada 100 voltavam; nessa semana, ${C100(real.retorno_semana_pct)}` : ""}.</p>
+        <p class="achado-nota">Mas atenção: chegam cerca de 45 pessoas por semana, e com tão pouca gente o número oscila bastante por acaso. Olhando todas as semanas juntas, <b>não há diferença comprovada entre elas</b> (gráfico abaixo). Para decidir, acompanhe a tendência de várias semanas, não uma semana isolada.</p>
+        ${explicacao("Separamos a queda em duas partes: a que viria de chegarem mais pessoas de um tipo que volta menos (perfil) e a que vem de cada tipo voltar menos do que antes (retorno dentro de cada perfil). Quase toda a queda foi de retorno, não de perfil.", `Decomposição de Kitagawa contra as 4 semanas anteriores; diferença ${t.semana_analisada ? `${n1.format(t.semana_analisada.valor)} pp (IC 95% ${n1.format(t.semana_analisada.lo)} a ${n1.format(t.semana_analisada.hi)}; p = ${n1.format(t.semana_analisada.p)})` : ""}; teste qui-quadrado de homogeneidade entre as semanas com 30 pessoas ou mais${t.homogeneidade_semanas ? ` (p = ${n1.format(t.homogeneidade_semanas.p)})` : ""}.`, { "Antes e na semana": d.sql.semana_total, "Decomposição": d.sql.semana_segmentos, "Testes": d.sql.testes })}` : `<p class="estado">Sem semana analisada nesta carga.</p>`}
+      </div>
+    </div>
+
+    <div class="cartao" style="margin-bottom:16px"><h2>Retorno semana a semana</h2>
+      <p class="ajuda">Cada ponto é uma semana de chegada. A faixa cinza mostra quanto o número oscila só por acaso, com cerca de 45 pessoas por semana: um ponto dentro dela não indica mudança real. ${sw ? `A semana de ${DATA(sw.semana)} está destacada.` : ""} Semanas com menos de 30 pessoas ficam sem ponto.</p>
+      ${graficoSemanas(d.coortes, g.retorno_pct, sw ? sw.semana : null)}
+      <div class="legenda"><span><i style="background:var(--marca)"></i>semana dentro da faixa do acaso</span><span><i style="background:var(--atencao)"></i>fora da faixa</span>${sw ? `<span><i style="background:var(--ruim)"></i>semana analisada</span>` : ""}<span><i class="faixa" style="background:var(--fundo);border-color:var(--linha)"></i>faixa do acaso</span><span><i class="linha"></i>média da base</span></div>
+      ${explicacao(`Se todas as semanas tivessem o mesmo retorno da base inteira (${C100(g.retorno_pct)} de cada 100), 95 de cada 100 semanas cairiam dentro da faixa cinza só por sorte. Com cerca de 37 semanas, é normal uma ou duas ficarem fora.`, `Faixa = p ± 1,96 × √(p(1−p)/n), com p = retorno da base inteira e n = pessoas da semana. Teste qui-quadrado de homogeneidade entre as semanas com 30 pessoas ou mais${t.homogeneidade_semanas ? `: p = ${n1.format(t.homogeneidade_semanas.p)} (não rejeita que todas tenham o mesmo retorno)` : ""}.`, { "Retorno por semana": d.sql.coortes })}
+    </div>
+
+    <div class="grade g2">
+      <div class="cartao"><h2>Sinais de engajamento: descrevem o retorno, não o explicam</h2>
+        ${turnos && temas ? `<p>Quem conversa 5 vezes ou mais no primeiro dia volta <b>${C100(turnos.retorno_pct)} de cada 100</b> (contra ${C100(turnos.retorno_ref_pct)} de quem conversa menos), e quem usa mais de um tema volta <b>${C100(temas.retorno_pct)}</b> (contra ${C100(temas.retorno_ref_pct)}).</p>` : ""}
+        <p class="ajuda">Isso é consequência de uma boa primeira experiência, não algo que o produto ligue diretamente. Por isso fica fora da comparação acima.</p>
+      </div>
+      <div class="cartao"><h2>Insatisfação na primeira conversa</h2>
+        ${t.insatisfacao ? `<p>Entre quem mandou mais de uma mensagem, quem corrigiu, repetiu ou reclamou volta praticamente o mesmo que os demais: <b>${ENTRE100(t.insatisfacao.lo, t.insatisfacao.hi)} em cada 100</b>. A diferença pode ser acaso.</p>` : ""}
+        ${explicacao("Uma inteligência artificial marcou, nas conversas com mais de uma mensagem, quem corrigiu, repetiu ou reclamou da resposta. A marcação se repete em 93 de cada 100 casos quando refeita.", `Mesmo modelo dos efeitos, só com quem mandou mais de uma mensagem${t.insatisfacao ? ` (${N(t.insatisfacao.n)} pessoas)` : ""}; IC 95% pelo método delta; estabilidade da marcação: κ de Cohen = 0,93.`, { "Testes": d.sql.testes })}
       </div>
     </div>
 
     <div class="grade g2">
       <div class="cartao"><h2>O número muda conforme a forma de medir?</h2>
         <p class="ajuda">Cada linha muda uma única regra de contagem. Quase nada muda, exceto contar quem volta <b>no mesmo dia</b>, que sobe bastante o número. Por isso deixamos claro qual regra usamos.</p>
-        <div class="rolagem"><table><tr><th>Regra</th><th class="num">Voltam de cada 100</th></tr>
-        ${d.sensibilidade.map((s) => `<tr${s.cenario.startsWith("referência") ? ' class="ref"' : ""}><td>${esc(REGRAS[s.cenario] || s.cenario)}</td><td class="num">${C100(s.retorno_pct)}</td></tr>`).join("")}</table></div>
+        <div class="rolagem"><table><tr><th>Regra</th><th class="num">Voltam de cada 100</th><th class="num">Margem de erro</th></tr>
+        ${d.sensibilidade.map((s) => `<tr${s.cenario.startsWith("referência") ? ' class="ref"' : ""}><td>${esc(REGRAS[s.cenario] || s.cenario)}</td><td class="num">${C100(s.retorno_pct)}</td><td class="num">${esc(String(s.ic95 || "").replace(/(\d+[.,]\d)[–-](\d+[.,]\d)/, (_, a, b) => `${C100(Number(a.replace(",", ".")))} a ${C100(Number(b.replace(",", ".")))}`))}</td></tr>`).join("")}</table></div>
       </div>
       <div class="cartao"><h2>Como sabemos o tema de cada conversa?</h2><p>${COMO_CLASSIFICAMOS.simples}</p>
         <details><summary>Detalhe técnico</summary><div class="tecnico">${COMO_CLASSIFICAMOS.tecnico}</div></details>
@@ -394,7 +529,7 @@ async function paginaAnalise(el) {
   return d.procedencia;
 }
 
-const PAGINAS = { explorar: paginaExplorar, analise: paginaAnalise };
+const PAGINAS = { resposta: paginaResposta, explorar: paginaExplorar };
 
 function rodape(p) {
   $("#rodape").innerHTML = `<b>Fonte:</b> ${esc(p.fonte)} · ${N(p.linhas_brasil)} conversas do Brasil, de ${N(p.linhas_fonte)} na base ·
@@ -404,8 +539,9 @@ function rodape(p) {
 }
 
 async function mostrar() {
-  const [aba, qs] = (location.hash.slice(1) || "explorar").split("?");
-  const pagina = PAGINAS[aba] ? aba : "explorar";
+  const [bruta, qs] = (location.hash.slice(1) || "resposta").split("?");
+  const aba = bruta === "analise" ? "resposta" : bruta;  // endereço antigo da tela
+  const pagina = PAGINAS[aba] ? aba : "resposta";
   document.querySelectorAll("nav a").forEach((a) => (a.dataset.aba === pagina ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
   const el = $("#conteudo");
   el.innerHTML = `<p class="estado">Carregando…</p>`;

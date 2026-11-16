@@ -101,12 +101,28 @@ def _termo(fator: str) -> str:
     return f"C({fator}, Treatment(reference='{FATORES[fator][1]}'))"
 
 
-def ajustado(d: pd.DataFrame) -> pd.DataFrame:
-    """Efeito marginal médio de cada nível, com todos os fatores e a época no modelo."""
+def _modelo(d: pd.DataFrame):  # type: ignore[no-untyped-def]
+    """Regressão logística com todos os fatores e a época (controle), erros robustos (HC1)."""
     formula = "y ~ " + " + ".join(
         [_termo(f) for f in FATORES] + [f"C({c})" for c in CONTROLES]
     )
-    modelo = smf.logit(formula, data=d).fit(disp=0, cov_type="HC1")
+    return smf.logit(formula, data=d).fit(disp=0, cov_type="HC1")
+
+
+def diagnostico(d: pd.DataFrame) -> dict[str, float]:
+    """Quanto a 1ª experiência explica do retorno: pseudo-R² de McFadden e o teste da
+    razão de verossimilhança contra o modelo sem nenhum fator."""
+    modelo = _modelo(d)
+    return {
+        "pseudo_r2": float(modelo.prsquared),
+        "p": float(modelo.llr_pvalue),
+        "n": int(modelo.nobs),
+    }
+
+
+def ajustado(d: pd.DataFrame) -> pd.DataFrame:
+    """Efeito marginal médio de cada nível, com todos os fatores e a época no modelo."""
+    modelo = _modelo(d)
     me = modelo.get_margeff(at="overall", dummy=True).summary_frame()
     linhas = []
     for termo, row in me.iterrows():

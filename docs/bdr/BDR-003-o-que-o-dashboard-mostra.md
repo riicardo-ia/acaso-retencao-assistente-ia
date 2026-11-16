@@ -10,7 +10,7 @@ O público é de negócio, não estatístico, e o dashboard é um self-host BI: 
 
 | Tema | Opções | Escolha |
 |---|---|---|
-| Telas | uma tela com tudo filtrável · **Explorar (filtrável) + Análise completa (fixa)** | Separar exploração de conclusão: o efeito "comparando pessoas parecidas" vem de um modelo que não deve ser recalculado em grupos pequenos |
+| Telas | uma tela com tudo filtrável · **A resposta (fixa, abre primeiro) + Explorar (filtrável)** | Separar exploração de conclusão: o efeito "comparando pessoas parecidas" vem de um modelo que não deve ser recalculado em grupos pequenos |
 | Filtros | todas as variáveis da 1ª experiência · **só as principais** | Período do 1º uso, idioma, dispositivo, tema da 1ª conversa e modelo. Engajamento (turnos, insatisfação) não é filtro: não é causa e convida a conclusões erradas |
 | Frases automáticas | texto livre por LLM · **regras fixas com trava estatística** | Só "confirmada" com 30+ pessoas e diferença acima da margem de erro com 99% de confiança |
 | Amostra mínima | sem limite · esconder só na tela · **esconder na API** | Com menos de 30 pessoas, a API não devolve nenhum número do grupo; a tela mostra "menos de 30" ou "poucas pessoas", sem conclusão |
@@ -24,5 +24,5 @@ O público é de negócio, não estatístico, e o dashboard é um self-host BI: 
 
 ## Consequências
 
-- A frase da tela Explorar pode divergir da Análise completa (comparação simples × pessoas parecidas); a tela explica a diferença.
+- A frase da tela Explorar pode divergir da tela A resposta (comparação simples × pessoas parecidas); a tela explica a diferença.
 - Os filtros são validados por teste de integração (`tests/test_explorar_dados.py`).

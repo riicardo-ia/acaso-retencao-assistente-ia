@@ -43,7 +43,8 @@ h2 { font-size: 16px; margin: 0 0 4px; }
 .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .g21 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
-@media (max-width: 1180px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3, .g21 { grid-template-columns: minmax(0, 1fr); } }
+.g13 { grid-template-columns: minmax(240px, 1fr) minmax(0, 2.6fr); align-items: start; }
+@media (max-width: 1180px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3, .g21, .g13 { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .g4, .g2 { grid-template-columns: minmax(0, 1fr); } .marca .produto { display: none; } .filtros { position: static; } .filtros select, .filtros input { min-width: 0; width: 100%; } .filtros label { flex: 1 1 140px; } }
 .cartao { background: var(--cartao); border: 1px solid var(--linha); border-radius: var(--raio); box-shadow: var(--sombra); padding: 18px; min-width: 0; }
 .kpi .rotulo { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--suave); font-weight: 600; }
@@ -102,10 +103,19 @@ h3.bloco.ruim { color: var(--ruim); } h3.bloco.bom { color: var(--bom); } h3.blo
 tr.ref td { font-weight: 600; background: var(--marca-fundo); }
 .b100 { display: grid; grid-template-columns: minmax(110px, max-content) 1fr 34px; gap: 8px 12px; align-items: center; margin: 4px 0 12px; }
 .b100 .nome { font-size: 14px; text-align: right; } .b100 b { font-size: 17px; }
-.b100 .barra { background: var(--fundo); border-radius: 6px; height: 20px; overflow: hidden; } .b100 .barra i { display: block; height: 100%; border-radius: 6px; }
+.b100 .barra { position: relative; background: var(--fundo); border-radius: 6px; height: 20px; overflow: hidden; } .b100 .barra i { display: block; height: 100%; border-radius: 6px; }
+.b100 .barra s { position: absolute; top: 9px; height: 2px; background: var(--texto); opacity: .5; text-decoration: none; }
 @media (max-width: 760px) {
   .fator { grid-template-columns: 1fr auto; grid-template-areas: "nome valor" "barra barra"; gap: 4px 10px; }
   .fator .nome { grid-area: nome; } .fator .valor { grid-area: valor; text-align: right; } .fator .barra { grid-area: barra; }
   .b100 .nome { text-align: left; }
 }
 details .tecnico ul { margin: 6px 0 0; padding-left: 18px; } details .tecnico li { margin: 4px 0; }
+
+/* A resposta */
+h2.secao { font-size: 18px; margin: 8px 0 10px; }
+.achado-nota { background: var(--atencao-fundo); color: var(--texto); border-radius: 10px; padding: 8px 12px; font-size: 14px; margin: 10px 0 0; }
+.resumo-resposta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 22px; background: var(--cartao); border: 1px solid var(--linha); border-left: 4px solid var(--marca); border-radius: var(--raio); padding: 12px 18px; margin-bottom: 16px; }
+.resumo-resposta .titulo span { color: var(--suave); font-size: 13px; }
+.resumo-resposta ul { margin: 0; padding-left: 18px; flex: 1 1 520px; } .resumo-resposta li { margin: 2px 0; }
+.resumo-resposta a { color: var(--marca); font-weight: 600; white-space: nowrap; }

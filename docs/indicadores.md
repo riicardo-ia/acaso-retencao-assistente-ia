@@ -41,7 +41,7 @@ A margem de erro (IC 95% de Wilson) é a função `mart.wilson(voltaram, pessoas
 | Amostra pequena | com menos de 30 pessoas, a API não devolve nenhum número (nem a contagem); a tela mostra "menos de 30" e "amplie o recorte" |
 
 ```sql
-SELECT usuarios, voltaram, retorno_pct, ic_lo, ic_hi FROM mart.vw_retorno_geral;   -- Análise completa
+SELECT usuarios, voltaram, retorno_pct, ic_lo, ic_hi FROM mart.vw_retorno_geral;   -- A resposta
 
 -- Explorar (com os 5 filtros; parâmetro nulo = sem filtro)
 WITH recorte AS (
@@ -63,7 +63,7 @@ FROM recorte;
 
 | | |
 |---|---|
-| Definição | o mesmo retorno, para quem começou em cada mês (Explorar) ou semana (Análise) |
+| Definição | o mesmo retorno, para quem começou em cada mês (Explorar) ou semana (A resposta). Na semana, a **faixa do acaso** é onde o número cairia só por sorte se o retorno fosse o da base inteira: p ± 1,96 × √(p(1−p)/n) |
 | Denominador | pessoas novas do mês/semana |
 | Período | mês/semana do 1º uso (semana de segunda a domingo, horário de São Paulo) |
 | Amostra pequena | mês ou semana com menos de 30 pessoas sai sem números da API e fica sem ponto na tela |
@@ -76,8 +76,12 @@ SELECT mes, count(*) AS n, count(*) FILTER (WHERE retornou) AS voltaram,
        mart.wilson(count(*) FILTER (WHERE retornou), count(*), 1)  AS ic_hi
 FROM recorte GROUP BY mes ORDER BY mes;
 
--- Análise completa: pré-calculado por semana
-SELECT semana, novos, voltaram, retorno_pct, ic_lo, ic_hi FROM mart.mv_coortes_semanais ORDER BY semana;
+-- A resposta: pré-calculado por semana, com a faixa do acaso
+SELECT c.semana, c.novos, c.voltaram, c.retorno_pct, c.ic_lo, c.ic_hi,
+       round(g.retorno_pct - 196 * sqrt(g.retorno_pct / 100 * (1 - g.retorno_pct / 100) / c.novos), 1) AS acaso_lo,
+       round(g.retorno_pct + 196 * sqrt(g.retorno_pct / 100 * (1 - g.retorno_pct / 100) / c.novos), 1) AS acaso_hi
+FROM mart.mv_coortes_semanais c CROSS JOIN mart.vw_retorno_geral g
+ORDER BY c.semana;
 ```
 
 ## 3. Quem volta mais, por grupo (Explorar)
@@ -114,7 +118,7 @@ FROM recorte r JOIN mart.conversas c ON c.usuario_id = r.usuario_id
 GROUP BY r.tema ORDER BY pct_pessoas DESC;
 ```
 
-## 5. Efeito de cada fator (Análise completa)
+## 5. Efeito de cada fator (A resposta)
 
 | | |
 |---|---|
@@ -132,7 +136,7 @@ SELECT fator, rotulo, nivel, referencia, n, retorno_pct, retorno_ref_pct,
 FROM mart.efeitos;
 ```
 
-## 6. O GPT-4 faz diferença? (Análise completa)
+## 6. O GPT-4 faz diferença? (A resposta)
 
 | | |
 |---|---|
@@ -148,7 +152,7 @@ Calculado na carga (`analise/efeitos.py`) e gravado em `mart.gpt4_selecao`:
 SELECT metodo, detalhe, dif_pp, lo, hi, n FROM mart.gpt4_selecao;
 ```
 
-## 7. A semana mudou por perfil ou por taxa? (Análise completa)
+## 7. A semana mudou por perfil ou por taxa? (A resposta)
 
 | | |
 |---|---|
@@ -165,7 +169,7 @@ SELECT segmento, round(sum(mix_pp), 1) AS mix_pp, round(sum(taxa_pp), 1) AS taxa
 FROM mart.semana_decomposicao GROUP BY segmento ORDER BY segmento;
 ```
 
-## 8. Sensibilidade às regras de contagem (Análise completa)
+## 8. Sensibilidade às regras de contagem (A resposta)
 
 | | |
 |---|---|

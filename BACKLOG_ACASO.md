@@ -20,7 +20,7 @@
 | AN-1-02 | Quais fatores têm o maior efeito e quanto pesa cada um | Efeitos com intervalo de confiança, ordenados | P0 | E3 | feito · 06 §1 |
 | AN-1-03 | Quanto disso é causa e não seleção | Bruto × ajustado, tratamento de confusão e limites declarados | P0 | E3 | feito · 06 §2 (regressão, IPW, regime de oferta) |
 | AN-1-04 | Análise estatística, não só descritiva: efeito de cada fator com sua incerteza | Todo efeito com intervalo de confiança | P0 | E3 | feito |
-| AN-1-05 | Recomendar o que mudar ao cliente | Recomendações ligadas aos achados | P0 | E3/E7 | feito · 06 §4 e tela Análise completa |
+| AN-1-05 | Recomendar o que mudar ao cliente | Recomendações ligadas aos achados | P0 | E3/E7 | feito · 06 §4 e tela A resposta |
 
 ### A2 · §2 Base de dados
 
@@ -80,7 +80,7 @@
 |---|---|---|---|---|---|
 | IN-3-01 | Sobe do zero com um comando (`docker compose up`) | Teste em clone limpo | P0 | E8 | feito |
 | IN-3-02 | Carrega a base analítica a partir da base bruta | Serviço `etl` no compose | P0 | E1/E5 | feito · com reconciliação SQL × Python |
-| IN-3-03 | Pelo menos duas telas com dados reais | Telas no ar | P0 | E6 | feito · Explorar e Análise completa |
+| IN-3-03 | Pelo menos duas telas com dados reais | Telas no ar | P0 | E6 | feito · A resposta e Explorar |
 | IN-3-04 | Repositório com instruções | README | P0 | E7 | feito |
 | IN-3-05 | Decisões técnicas (ADRs) e de negócio (BDRs): contexto, opções e escolha | `docs/adr/`, `docs/bdr/` | P0 | contínuo | feito · 3 ADRs e 3 BDRs |
 | IN-3-06 | Premissas registradas quando faltar informação | Ver AN-2.3-01 | P0 | E2 | feito |
@@ -99,7 +99,7 @@
 | IN-3.3-08 | Outros países: idioma da interface, fuso de cada país e comparação | Seção de desenho | P1 | E7 | feito · DOCUMENTO §4 |
 | IN-3.3-09 | Desempenho: o que é pré-calculado, o que vai para cache, quando expira e como mede o tempo de resposta | Seção e medição real | P1 | E6/E7 | feito · 25–40 ms sem cache, 2–3 ms com cache |
 | IN-3.3-10 | *(extra)* Quem lê consegue conferir: n, margem de erro, método, SQL, sensibilidade, bruto × ajustado | Recursos nas telas | P0 | E6 | feito |
-| IN-3.3-11 | *(extra)* Duas telas: Explorar (5 filtros principais, frases por regra) e Análise completa (fixa) | BDR-003 e telas | P0 | E6 | feito · filtros validados contra o banco |
+| IN-3.3-11 | *(extra)* Duas telas: A resposta (fixa, abre primeiro) e Explorar (5 filtros principais, frases por regra) | BDR-003 e telas | P0 | E6 | feito · filtros validados contra o banco |
 | IN-3.3-12 | *(extra)* Layout responsivo, identidade visual da Acaso, gráficos comuns e linguagem simples | Telas | P1 | E6 | feito |
 
 ### B4 · §1 Usuário final

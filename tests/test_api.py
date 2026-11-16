@@ -103,6 +103,26 @@ LINHAS: dict[str, list[dict[str, Any]]] = {
             "ic_hi": 20.0,
         }
     ],
+    "achados": [
+        {
+            "achado": "dispositivo",
+            "grupo": "celular",
+            "n": 723,
+            "voltaram": 98,
+            "retorno_pct": 13.6,
+            "ic_lo": 11.3,
+            "ic_hi": 16.2,
+        },
+        {
+            "achado": "chegada",
+            "grupo": "burlar_regras",
+            "n": 12,
+            "voltaram": 1,
+            "retorno_pct": 8.3,
+            "ic_lo": 1.5,
+            "ic_hi": 35.4,
+        },
+    ],
     "coortes": [
         {
             "semana": "2023-11-20",
@@ -253,3 +273,12 @@ def test_toda_resposta_tem_request_id_e_tempo(cliente: TestClient) -> None:
     r = cliente.get("/healthz")
     assert r.headers["x-request-id"].startswith("req_")
     assert r.headers["server-timing"].startswith("app;dur=")
+
+
+def test_resposta_traz_achados_com_margem_e_faixa_do_acaso(cliente: TestClient) -> None:
+    d = cliente.get("/api/analise").json()
+    cel = next(a for a in d["achados"] if a["grupo"] == "celular")
+    assert cel["ic_lo"] < cel["retorno_pct"] < cel["ic_hi"]
+    pequeno = next(a for a in d["achados"] if a["grupo"] == "burlar_regras")
+    assert pequeno["retorno_pct"] is None
+    assert "acaso_lo" in d["sql"]["coortes"] and "mart.wilson" in d["sql"]["achados"]

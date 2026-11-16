@@ -14,7 +14,7 @@ Requisitos: Docker com Compose, ~4 GB livres (imagens e base bruta) e acesso à 
 docker compose up --build
 ```
 
-Na primeira vez, a carga leva cerca de 6 minutos (download e filtro); depois, cerca de 30 segundos. Quando o serviço `etl` terminar com `carga ok: ... reconciliação SQL = Python`, o dashboard estará em **http://localhost:8000**, com duas telas: **Explorar** (filtros por período, idioma, dispositivo, tema e modelo) e **Análise completa** (os resultados estatísticos, fixos). A documentação da API fica em `/api/docs`.
+Na primeira vez, a carga leva cerca de 6 minutos (download e filtro); depois, cerca de 30 segundos. Quando o serviço `etl` terminar com `carga ok: ... reconciliação SQL = Python`, o dashboard estará em **http://localhost:8000**, com duas telas: **A resposta** (a pergunta de negócio respondida, com a estatística; abre primeiro) e **Explorar** (filtros por período, idioma, dispositivo, tema e modelo). A documentação da API fica em `/api/docs`.
 
 Nenhuma credencial é necessária: os temas das conversas já vêm classificados em `data/seed/temas.csv`, e as senhas padrão do compose servem só para rodar localmente.
 

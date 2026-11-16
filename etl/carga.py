@@ -180,6 +180,7 @@ def montar(sal: str) -> dict[str, pd.DataFrame]:
     _, p_semana = test_proportions_2indep(ka, na, kb, nb, method="wald")
     lo_s, hi_s = confint_proportions_2indep(ka, na, kb, nb, method="newcomb")
     insat = efeitos.insatisfacao(d).iloc[0]
+    diag = efeitos.diagnostico(d)
     testes = pd.DataFrame(
         [
             {
@@ -200,6 +201,16 @@ def montar(sal: str) -> dict[str, pd.DataFrame]:
                 "hi": 100 * hi_s,
                 "p": p_semana,
                 "n": na + nb,
+            },
+            {
+                "nome": "modelo_efeitos",
+                "descricao": "regressão logística dos efeitos: pseudo-R² de McFadden; p = teste da "
+                "razão de verossimilhança contra o modelo sem fatores",
+                "valor": diag["pseudo_r2"],
+                "lo": None,
+                "hi": None,
+                "p": diag["p"],
+                "n": diag["n"],
             },
             {
                 "nome": "insatisfacao",
