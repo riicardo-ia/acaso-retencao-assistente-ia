@@ -40,6 +40,15 @@ def _sem_filtro() -> dict[str, Any]:
     return {"inicio": op["inicio"], "fim": op["fim"], **{d: None for d in DIMENSOES}}
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _exige_carga() -> None:
+    """No CI o banco existe, mas está vazio (sem a base bruta): a integração fica para o local."""
+    with psycopg.connect(URL or "") as c:
+        linha = c.execute("SELECT count(*) FROM mart.cargas").fetchone()
+    if not linha or not linha[0]:
+        pytest.skip("banco sem carga: teste de integração pulado")
+
+
 @pytest.fixture(scope="module")
 def python() -> pd.DataFrame:
     """Retorno por pessoa calculado em Python a partir dos eventos, com o perfil do banco."""

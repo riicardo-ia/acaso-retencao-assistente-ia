@@ -144,12 +144,13 @@ Documentação interativa em `/api/docs`.
 **Como perceber a divergência antes do cliente:** a carga compara o retorno por coorte em SQL e em Python e **não publica** se divergir. Em produção, há ainda um alarme do CloudWatch para carga com erro ou para a razão "usuários ÷ IPs" fora do histórico (o sintoma do §4.2).
 
 **Testes que impedem uma definição de mudar sem ninguém perceber:**
-- `tests/test_definicoes.py`: usuário, 1º dia, retorno D+1..D+7, fuso e cortes;
-- `tests/test_variaveis.py`, `tests/test_classificar.py`;
-- `tests/test_api.py` e `tests/test_insights.py`: contrato das rotas, validação dos filtros, regra de n < 30 e as frases automáticas;
-- `tests/test_explorar_dados.py`: integração com o banco, que confere que sem filtro o número é o oficial, que as partes somam o todo e que, em filtros sorteados, o SQL bate com um cálculo independente em Python.
+- `tests/test_definicoes.py`: quem é a pessoa (o mesmo IP com navegadores diferentes é a mesma pessoa), 1º dia, retorno D+1..D+7, fuso e cortes;
+- `tests/test_estrutura.py`: a **definição do retorno congelada** (o hash da view e da margem de erro no banco; se mudar, o teste quebra e pede a revisão do BDR-001), migração aplicada nunca editada e o papel do dashboard só lendo o `mart`;
+- `tests/test_variaveis.py`, `tests/test_classificar.py` e `tests/test_efeitos.py` (o modelo recupera um efeito plantado em dados sintéticos);
+- `tests/test_api.py` e `tests/test_insights.py`: contrato das rotas, validação dos filtros, nenhum número de grupo com menos de 30 pessoas e as frases automáticas;
+- `tests/test_explorar_dados.py`: integração com o banco carregado, que confere que sem filtro o número é o oficial, que as partes somam o todo e que, em filtros sorteados, o SQL bate com um cálculo independente em Python.
 
-Todos rodam com ruff e mypy como gate.
+Cada push roda no CI (`.github/workflows/ci.yml`): ruff, formatação, mypy e os testes, com um Postgres que recebe os papéis e as migrações. A integração com os dados reais roda localmente, com o compose.
 
 **Caminho até a produção:** ambientes dev → homologação → produção, com o mesmo container em todos. A migração nova é aplicada pela carga (`mart.migracoes`), sempre arquivo novo e nunca editado. O deploy é feito por CI com testes, build da imagem, ECR e atualização do serviço ECS. A homologação recebe a carga completa e a reconciliação antes da troca.
 

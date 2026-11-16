@@ -1,0 +1,12 @@
+# Configuração das ferramentas de qualidade: os mesmos gates rodam localmente e no CI.
+[tool.mypy]
+python_version = "3.12"
+files = ["app", "etl", "analise"]
+
+[[tool.mypy.overrides]]
+# bibliotecas científicas sem tipos publicados
+module = ["scipy.*", "statsmodels.*", "sklearn.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -29,11 +29,15 @@ docker compose exec db psql -U bi_owner -d bi -c "SELECT * FROM mart.cargas ORDE
 
 Cada gráfico mostra a consulta SQL em "Como calculamos?"; todas estão em [`docs/indicadores.md`](docs/indicadores.md).
 
-Validação automática dos filtros contra o banco (com o compose no ar):
+Validação automática contra o banco (com o compose no ar): os filtros, a definição do retorno congelada e o acesso só de leitura do dashboard.
 
 ```bash
-DATABASE_URL_APP=postgresql://bi_app:local_app@127.0.0.1:55432/bi .venv/bin/python -m pytest tests/test_explorar_dados.py
+DATABASE_URL_ETL=postgresql://bi_etl:local_etl@127.0.0.1:55432/bi \
+DATABASE_URL_APP=postgresql://bi_app:local_app@127.0.0.1:55432/bi \
+.venv/bin/python -m pytest tests/test_explorar_dados.py tests/test_estrutura.py
 ```
+
+Os mesmos gates (ruff, formatação, mypy e testes) rodam no CI a cada push.
 
 ## Reproduzir a análise (fora do Docker)
 
