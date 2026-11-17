@@ -35,6 +35,7 @@ DOCUMENTOS: dict[str, tuple[str, str, str]] = {
     "documento": ("Resumo", "Documento final", "DOCUMENTO.md"),
     "indicadores": ("Resumo", "Indicadores", "indicadores.md"),
     "incidente": ("Resumo", "Incidentes", "incidente-4.2.md"),
+    "arquitetura-aws": ("Resumo", "Arquitetura AWS", "arquitetura-aws.md"),
     "bdr-001": (
         "Decisões de negócio (BDR)",
         "BDR-001 · Definições de uso e retorno",

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 470" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" role="img" aria-label="Arquitetura na AWS">
+  <title>Arquitetura na AWS</title>
+  <defs><marker id="s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#6b7280"/></marker></defs>
+  <rect width="1080" height="470" fill="#ffffff"/>
+  <!-- VPC -->
+  <rect x="250" y="20" width="560" height="430" rx="14" fill="#fafafa" stroke="#a1a1aa" stroke-dasharray="6 5"/>
+  <text x="266" y="42" fill="#6b7280" font-weight="600">VPC (rede privada da conta)</text>
+  <rect x="270" y="56" width="520" height="80" rx="10" fill="#f6f7f9" stroke="#e5e7eb"/>
+  <text x="284" y="74" fill="#6b7280" font-size="11.5">sub-rede pública</text>
+  <rect x="270" y="150" width="520" height="285" rx="10" fill="#f6f7f9" stroke="#e5e7eb"/>
+  <text x="284" y="168" fill="#6b7280" font-size="11.5">sub-redes privadas (sem acesso direto da internet)</text>
+
+  <g stroke-width="1.3">
+    <rect x="20" y="70" width="170" height="56" rx="10" fill="#f6f7f9" stroke="#a1a1aa"/>
+    <rect x="20" y="160" width="170" height="56" rx="10" fill="#efebfd" stroke="#6a48eb"/>
+    <rect x="20" y="250" width="170" height="56" rx="10" fill="#efebfd" stroke="#6a48eb"/>
+    <rect x="440" y="76" width="180" height="50" rx="10" fill="#efebfd" stroke="#6a48eb"/>
+    <rect x="300" y="190" width="200" height="60" rx="10" fill="#efebfd" stroke="#6a48eb"/>
+    <rect x="560" y="190" width="200" height="60" rx="10" fill="#efebfd" stroke="#6a48eb"/>
+    <rect x="430" y="330" width="200" height="60" rx="10" fill="#efebfd" stroke="#6a48eb"/>
+    <rect x="860" y="60" width="200" height="50" rx="10" fill="#f6f7f9" stroke="#a1a1aa"/>
+    <rect x="860" y="130" width="200" height="50" rx="10" fill="#f6f7f9" stroke="#a1a1aa"/>
+    <rect x="860" y="200" width="200" height="50" rx="10" fill="#f6f7f9" stroke="#a1a1aa"/>
+    <rect x="860" y="270" width="200" height="50" rx="10" fill="#f6f7f9" stroke="#a1a1aa"/>
+    <rect x="860" y="340" width="200" height="50" rx="10" fill="#f6f7f9" stroke="#a1a1aa"/>
+  </g>
+  <g text-anchor="middle" fill="#121212">
+    <text x="105" y="94" font-weight="600">Pessoa do cliente</text><text x="105" y="112" fill="#6b7280">navegador</text>
+    <text x="105" y="184" font-weight="600">CloudFront + S3</text><text x="105" y="202" fill="#6b7280">página (HTML, JS, CSS)</text>
+    <text x="105" y="274" font-weight="600">Cognito</text><text x="105" y="292" fill="#6b7280">login do cliente</text>
+    <text x="530" y="98" font-weight="600">ALB</text><text x="530" y="115" fill="#6b7280">entrada HTTPS da API</text>
+    <text x="400" y="214" font-weight="600">ECS Fargate: API</text><text x="400" y="232" fill="#6b7280">FastAPI, só leitura</text>
+    <text x="660" y="214" font-weight="600">ECS Fargate: carga</text><text x="660" y="232" fill="#6b7280">e temas, pelo EventBridge</text>
+    <text x="530" y="354" font-weight="600">RDS PostgreSQL</text><text x="530" y="372" fill="#6b7280">base analítica (schema mart)</text>
+    <text x="960" y="82" font-weight="600">S3: base bruta</text><text x="960" y="99" fill="#6b7280">privado, só a carga lê</text>
+    <text x="960" y="152" font-weight="600">Bedrock</text><text x="960" y="169" fill="#6b7280">LLM da classificação</text>
+    <text x="960" y="222" font-weight="600">Secrets Manager</text><text x="960" y="239" fill="#6b7280">senhas e sal</text>
+    <text x="960" y="292" font-weight="600">CloudWatch</text><text x="960" y="309" fill="#6b7280">logs, métricas, alarmes</text>
+    <text x="960" y="362" font-weight="600">ECR</text><text x="960" y="379" fill="#6b7280">imagens do CI</text>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#s)">
+    <path d="M105 126 V158"/>
+    <path d="M190 98 H438"/>
+    <path d="M105 216 V248"/>
+    
+    <path d="M530 126 Q470 160 430 188"/>
+    <path d="M400 250 Q420 300 470 328"/>
+    <path d="M660 250 Q640 300 590 328"/>
+    <path d="M858 90 Q790 120 740 188"/>
+    <path d="M858 160 L762 205"/>
+  </g>
+  <path d="M190 278 C 228 278, 222 100, 232 100" fill="none" stroke="#6a48eb" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <circle cx="232" cy="98" r="3.5" fill="#6a48eb"/>
+  <g fill="#6b7280" font-size="11.5" text-anchor="middle">
+    <text x="320" y="92">HTTPS + login</text>
+    <text x="395" y="300">papel bi_app: SELECT</text>
+    <text x="680" y="300">COPY + reconciliação</text>
+    <text x="836" y="196">só ao</text><text x="836" y="209">reclassificar</text>
+  </g>
+</svg>

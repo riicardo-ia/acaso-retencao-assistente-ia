@@ -95,6 +95,8 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 | Logs e métricas | CloudWatch | um lugar para a carga e a API |
 | Login (fora do escopo local) | Cognito no ALB | o cliente vê só o próprio dashboard |
 
+Detalhe de cada serviço, dos caminhos de uma carga e de uma visita, rede, segurança, deploy, monitoramento e custo: [`arquitetura-aws.md`](arquitetura-aws.md).
+
 **Classificação portátil entre provedores de LLM.** A classificação de temas usa o LangChain (`init_chat_model`), e o provedor e o modelo são escolhidos só no `.env` (`LLM_PRIMARY_PROVIDER` e `LLM_PRIMARY_MODEL`), sem mudar código. Trocar de provedor é trocar duas linhas de configuração e rodar de novo a validação dos temas (`analise/validar_temas.py`), porque o modelo muda:
 
 | Provedor | Configuração | Situação |

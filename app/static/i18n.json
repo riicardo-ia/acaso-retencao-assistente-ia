@@ -1214,5 +1214,9 @@
  "Outro idioma": {
   "en": "Other language",
   "es": "Otro idioma"
+ },
+ "Arquitetura AWS": {
+  "en": "AWS architecture",
+  "es": "Arquitectura AWS"
  }
 }
