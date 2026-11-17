@@ -1182,5 +1182,37 @@
  "Incidentes": {
   "en": "Incidents",
   "es": "Incidentes"
+ },
+ "Buscar": {
+  "en": "Search",
+  "es": "Buscar"
+ },
+ "Buscar nas telas e nos documentos": {
+  "en": "Search the screens and documents",
+  "es": "Buscar en las pantallas y los documentos"
+ },
+ "Nas telas": {
+  "en": "On the screens",
+  "es": "En las pantallas"
+ },
+ "Nos filtros": {
+  "en": "In the filters",
+  "es": "En los filtros"
+ },
+ "Nos documentos": {
+  "en": "In the documents",
+  "es": "En los documentos"
+ },
+ "Nada encontrado.": {
+  "en": "Nothing found.",
+  "es": "No se encontró nada."
+ },
+ "Ver no Explorar, filtrado por {dim}": {
+  "en": "See in Explore, filtered by {dim}",
+  "es": "Ver en Explorar, filtrado por {dim}"
+ },
+ "Outro idioma": {
+  "en": "Other language",
+  "es": "Otro idioma"
  }
 }

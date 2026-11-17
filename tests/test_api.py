@@ -1,5 +1,6 @@
 """Contrato das rotas do dashboard, sem banco (consultas simuladas)."""
 
+import time
 from datetime import date
 from typing import Any
 
@@ -328,3 +329,38 @@ def test_tela_sempre_confere_se_ha_versao_nova(cliente: TestClient) -> None:
     assert (
         "cache-control" not in cliente.get("/api/explorar").headers
     )  # a API usa o cache por carga
+
+
+# Busca nos documentos: índice em memória, sem acento e sem diferenciar maiúsculas.
+
+
+def test_busca_encontra_a_secao_do_documento(cliente: TestClient) -> None:
+    achados = cliente.get("/api/busca?q=KITAGAWA").json()
+    assert achados and achados[0]["documento"] in {"indicadores", "analise"}
+    assert all({"secao", "ancora", "trecho"} <= set(a) for a in achados)
+
+
+def test_busca_ignora_acento_e_termo_curto(cliente: TestClient) -> None:
+    com, sem = (
+        cliente.get("/api/busca?q=sessão").json(),
+        cliente.get("/api/busca?q=sessao").json(),
+    )
+    assert com == sem and com
+    assert cliente.get("/api/busca?q=a").json() == []
+
+
+def test_busca_e_rapida(cliente: TestClient) -> None:
+    from app import busca, main as m
+
+    docs = tuple((n, t, m.DOCS / a) for n, (_, t, a) in m.DOCUMENTOS.items())
+    busca.buscar("premissa", docs)  # monta o índice uma vez
+    inicio = time.perf_counter()
+    for termo in ("fuso", "celular retorno", "margem de erro", "incidente", "ipw") * 20:
+        busca.buscar(termo, docs)
+    assert time.perf_counter() - inicio < 0.5  # 100 buscas em menos de meio segundo
+
+
+def test_ancora_da_busca_existe_no_documento(cliente: TestClient) -> None:
+    achado = cliente.get("/api/busca?q=premissas").json()[0]
+    html = cliente.get(f"/api/documentos/{achado['documento']}").json()["html"]
+    assert f'id="{achado["ancora"]}"' in html

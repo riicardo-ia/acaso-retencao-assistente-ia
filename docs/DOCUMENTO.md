@@ -50,6 +50,8 @@ Sobe com `docker compose up --build` e abre em `http://localhost:8000`. É um **
 
 **Documentação.** Um terceiro link no topo abre, dentro do próprio dashboard, os documentos do repositório: este documento, os BDRs e ADRs, a análise passo a passo, os indicadores e o incidente. Só são servidos os arquivos de uma lista fechada, convertidos de Markdown no servidor.
 
+**Busca.** Um campo no topo procura nas telas (leva direto ao bloco), nos valores dos filtros (abre o Explorar já filtrado) e em todos os documentos, por seção (abre o documento na seção, com um trecho). Telas e filtros são buscados na própria página; os documentos, num índice montado uma vez no servidor e guardado em memória, sem consulta ao banco. A busca ignora acentos e maiúsculas, espera a pessoa parar de digitar e leva menos de 1 ms no servidor.
+
 **Linguagem.** Retornos em %, com uma casa decimal; diferenças em pontos percentuais, com um exemplo de leitura ("sair de 21% para 6% é −15 p.p."); "margem de erro", "mesmo considerando idioma, aparelho, horário, tema e época", "pode ser acaso", "não faz diferença comprovada". Cada gráfico tem "Como calculamos?" com uma explicação simples e o detalhe técnico recolhível, mais a consulta SQL.
 
 **Frases automáticas (Explorar).** São regras fixas, sem LLM (`app/insights.py`, testadas):
@@ -123,6 +125,7 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 | `GET /api/analise` | — | retorno geral e por semana, efeitos bruto e ajustado com IC, GPT-4 por três métodos, decomposição da semana, sensibilidade, testes, procedência, SQL |
 | `GET /api/documentos` | — | índice da Documentação: nome, grupo e título de cada documento |
 | `GET /api/documentos/{nome}` | nome de um documento da lista (fora dela → 404) | título e HTML do documento, com os links internos apontando para a própria página |
+| `GET /api/busca` | `q` (o que foi digitado) | até 8 seções de documentos: documento, seção, âncora e um trecho |
 | `GET /healthz` | — | `{"status": "ok"}` |
 
 Documentação interativa em `/api/docs`.

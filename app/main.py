@@ -24,7 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
-from app import insights
+from app import busca, insights
 
 N_MIN = insights.N_MIN
 ESTATICO = Path(__file__).parent / "static"
@@ -339,13 +339,28 @@ def documento(nome: str) -> dict[str, str]:
         raise HTTPException(404, "documento não encontrado")
     _, titulo, arquivo = DOCUMENTOS[nome]
     caminho = DOCS / arquivo
-    html = markdown.markdown(caminho.read_text(), extensions=["tables", "fenced_code"])
+    html = markdown.markdown(
+        caminho.read_text(), extensions=["tables", "fenced_code", "toc"]
+    )
     html = re.sub(
         r'(href|src)="([^"]+)"',
         lambda m: f'{m[1]}="{_link(m[2], caminho.parent)}"',
         html,
     )
     return {"nome": nome, "titulo": titulo, "html": html}
+
+
+@lru_cache(maxsize=256)
+def _buscar(consulta: str) -> list[dict[str, str]]:
+    return busca.buscar(
+        consulta, tuple((n, t, DOCS / a) for n, (_, t, a) in DOCUMENTOS.items())
+    )
+
+
+@app.get("/api/busca")
+def buscar(q: str = "") -> list[dict[str, str]]:
+    """Busca nos documentos, por seção. As telas e os filtros são buscados na própria página."""
+    return _buscar(q.strip()[:80])
 
 
 @app.get("/api/explorar")

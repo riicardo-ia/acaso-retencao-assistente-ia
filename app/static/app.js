@@ -31,6 +31,7 @@ function aplicarLingua() {
   document.title = T("Retorno do assistente · Acaso");
   document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = T(el.dataset.t); });
   document.querySelectorAll("[data-t-aria]").forEach((el) => el.setAttribute("aria-label", T(el.dataset.tAria)));
+  document.querySelectorAll("[data-t-placeholder]").forEach((el) => { el.placeholder = T(el.dataset.tPlaceholder); });
   document.querySelectorAll("[data-lingua]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lingua === LINGUA)));
 }
 function trocarLingua(nova) {
@@ -257,7 +258,7 @@ async function paginaExplorar(el, qs) {
   el.innerHTML = `
     <h1>${T("Explorar")}</h1>
     <p class="pergunta">${T("Escolha um recorte nos filtros acima e veja quantas pessoas voltaram a usar o assistente em até 7 dias, como isso evoluiu e quais grupos voltam mais ou menos. Todos os números mudam com os filtros.")}</p>
-    <div class="frases"><h2>${T("O que este recorte mostra")}</h2><ul>${d.frases.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
+    <div class="frases" id="recorte"><h2>${T("O que este recorte mostra")}</h2><ul>${d.frases.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
       <p class="nota">${T("Frases geradas por regras fixas: uma diferença só é chamada de “confirmada” quando é maior que a margem de erro (com 99% de confiança). São comparações simples; para o efeito comparando pessoas parecidas, veja <a href=\"#resposta\">A resposta</a>.")}</p></div>
     <div class="grade g4">
       ${kpi(T("Voltaram em até 7 dias"), r.suficiente ? P(r.retorno_pct) : "—", r.suficiente ? `${T("margem de erro:")} ${FAIXA(r.ic_lo, r.ic_hi)}` : ampliar, "destaque")}
@@ -266,13 +267,13 @@ async function paginaExplorar(el, qs) {
       ${kpi(T("Toda a base"), P(b.retorno_pct), T("{n} pessoas, sem filtro", { n: N(b.n) }))}
     </div>
     <div class="grade g21">
-      <div class="cartao"><h2>${T("Retorno mês a mês")}</h2>
+      <div class="cartao" id="retorno-mes"><h2>${T("Retorno mês a mês")}</h2>
         <p class="ajuda">${T("Cada ponto: das pessoas que começaram naquele mês, quantas voltaram.")} ${MARGEM()} ${T("Meses com menos de {n} pessoas ficam sem ponto.", { n: d.n_min })}</p>
         ${!d.serie.length ? `<p class="estado">${T("Sem pessoas neste recorte.")}</p>` : comMes ? graficoLinha(d.serie, r.suficiente ? r.retorno_pct : null, d.n_min) : `<p class="estado">${T("Nenhum mês tem {n} pessoas ou mais neste recorte. Amplie o período ou retire algum filtro para ver a evolução.", { n: d.n_min })}</p>`}
         <div class="legenda" ${comMes ? "" : "hidden"}><span><i style="background:var(--marca)"></i>${T("retorno do mês")}</span><span><i class="faixa"></i>${T("margem de erro")}</span><span><i class="linha"></i>${T("média do recorte")}</span></div>
         ${explicacao(T("Para cada mês, contamos quem usou o assistente pela primeira vez naquele mês e quantas dessas pessoas voltaram a usar em outro dia, em até 7 dias."), T("Retorno = pessoas com uso entre D+1 e D+7 (dia local de São Paulo) ÷ pessoas novas; margem de erro = intervalo de confiança de 95% de Wilson, calculado no banco."), { [T("Retorno por mês")]: d.sql["Retorno por mês"] })}
       </div>
-      <div class="cartao"><h2>${T("Pessoas novas por mês")}</h2>
+      <div class="cartao" id="novas-mes"><h2>${T("Pessoas novas por mês")}</h2>
         <p class="ajuda">${T("Quantas pessoas usaram o assistente pela primeira vez, mês a mês, neste recorte.")}</p>
         ${comMes ? graficoColunas(d.serie, d.n_min) : `<p class="estado">${T("Nenhum mês tem {n} pessoas ou mais neste recorte.", { n: d.n_min })}</p>`}
       </div>
@@ -282,7 +283,7 @@ async function paginaExplorar(el, qs) {
     </div>
     <div class="grade g2">
       ${cartaoGrupo(d, "tema", comoClassificamos())}
-      <div class="cartao"><h2>${T("Com que tema as pessoas chegam")}</h2>
+      <div class="cartao" id="chegada"><h2>${T("Com que tema as pessoas chegam")}</h2>
         <p class="ajuda">${T("<b style=\"color:var(--marca)\">Roxo:</b> % das pessoas, pelo tema da 1ª conversa. <b style=\"color:var(--laranja)\">Laranja:</b> % de todas as conversas dessas pessoas (quem usa muito pesa mais).")}</p>
         ${graficoChegada(d.chegada)}
         ${explicacao(comoClassificamos().simples, comoClassificamos().tecnico, { [T("Com que tema chegam")]: d.sql["Com que tema chegam"] })}
@@ -292,7 +293,7 @@ async function paginaExplorar(el, qs) {
 }
 function cartaoGrupo(d, x, classificacao) {
   const filtrado = d.filtros[x];
-  return `<div class="cartao"><h2>${T("Quem volta mais? Por {dim}", { dim: dimMinuscula(x) })}</h2>
+  return `<div class="cartao" id="grupo-${x}"><h2>${T("Quem volta mais? Por {dim}", { dim: dimMinuscula(x) })}</h2>
     <p class="ajuda">${filtrado ? T("Filtrado em “{v}”.", { v: esc(rot(filtrado)) }) + " " : ""}${T("A barra é o retorno de cada grupo; a linha fina é a margem de erro; a linha tracejada é a média do recorte.")}</p>
     ${graficoBarras(d.grupos[x], d.recorte.suficiente ? d.recorte.retorno_pct : null, d.n_min, x === "tema" ? 760 : 420)}
     ${explicacao(classificacao ? classificacao.simples : T("Mesma conta do retorno, separada por grupo. Grupos com menos de 30 pessoas aparecem como “poucas pessoas”, sem número."), classificacao ? classificacao.tecnico : T("Comparação simples (não leva em conta outras diferenças entre os grupos). Margem de erro = IC de 95% de Wilson."), { [T("Por grupo (exemplo: por tema; as outras dimensões trocam só a coluna agrupada)")]: d.sql["Por grupo"] })}
@@ -528,13 +529,13 @@ async function paginaResposta(el) {
     <p class="pergunta">${T("O que faz uma pessoa que experimentou o assistente voltar em até 7 dias, quanto pesa cada fator e quanto disso vinha do perfil de quem chega. Base: <b>{n} pessoas</b> que usaram o assistente pela primeira vez.", { n: N(g.usuarios) })}</p>
 
     <div class="grade g13">
-      <div class="pilha">
+      <div class="pilha" id="cartoes">
         <div class="cartao kpi destaque"><div class="rotulo">${T("Voltam em até 7 dias")}</div><div class="valor">${P(g.retorno_pct)}</div><div class="det">${T("margem de erro:")} ${FAIXA(g.ic_lo, g.ic_hi)}</div>
           <p class="det">${T("Voltar = usar de novo em outro dia, até 7 dias depois do primeiro uso.")}</p></div>
         <div class="cartao kpi"><div class="rotulo">${T("Pessoas analisadas")}</div><div class="valor">${N(g.usuarios)}</div><div class="det">${T("usaram o assistente pela 1ª vez entre {a} e {b}", { a: MES(d.coortes[0].semana), b: MES(d.coortes[d.coortes.length - 1].semana) })}</div></div>
         <div class="cartao kpi"><div class="rotulo">${T("Se voltar no mesmo dia contasse")}</div><div class="valor">${P(mesmoDia.retorno_pct)}</div>${mesmoHi != null ? `<div class="det">${T("margem de erro:")} ${FAIXA(mesmoLo, mesmoHi)}</div>` : ""}<div class="det">${T("é a regra de contagem que mais muda o número; usamos a de outro dia")}</div></div>
       </div>
-      <div class="cartao bloco-pergunta"><h2><span class="num">1</span>${T("O que faz uma pessoa que experimentou o assistente voltar em até 7 dias?")}</h2>
+      <div class="cartao bloco-pergunta" id="pergunta-1"><h2><span class="num">1</span>${T("O que faz uma pessoa que experimentou o assistente voltar em até 7 dias?")}</h2>
         <p class="resposta-curta">${r1}</p>
         ${graficoGrupos(secoes, g.retorno_pct)}
         <div class="legenda"><span><i style="background:var(--marca)"></i>${T("retorno de cada grupo")}</span><span><i class="linha"></i>${T("média de todos ({n})", { n: P(g.retorno_pct) })}</span><span>${T("a linha fina é a margem de erro")}</span></div>
@@ -543,7 +544,7 @@ async function paginaResposta(el) {
       </div>
     </div>
 
-    <div class="cartao bloco-pergunta" style="margin-bottom:16px"><h2><span class="num">2</span>${T("Quais fatores têm o maior efeito no retorno?")}</h2>
+    <div class="cartao bloco-pergunta" id="pergunta-2" style="margin-bottom:16px"><h2><span class="num">2</span>${T("Quais fatores têm o maior efeito no retorno?")}</h2>
       <p class="resposta-curta">${r2}</p>
       <p class="ajuda">${T("Quanto o retorno sobe ou desce, em pontos percentuais (p.p.), comparando pessoas parecidas em idioma, aparelho, horário, tema e época. Exemplo: sair de 21% para 6% é −15 p.p. A linha fina é a margem de erro: quando ela cruza o zero, não dá para afirmar que há diferença.")}</p>
       ${graficoPeso(peso, 1100)}
@@ -554,7 +555,7 @@ async function paginaResposta(el) {
           T("Regressão logística com todos os fatores e a época (regime de oferta do GPT-4) como controle; efeito marginal médio em pontos percentuais, intervalo de confiança de 95% pelo método delta, erros robustos (HC1). Turnos e número de temas no 1º dia ficam fora por serem consequência do engajamento (mediadores). Grupos com menos de 30 pessoas não aparecem.") + " " + diagnostico, { [T("Efeitos")]: d.sql.efeitos, [T("Diagnóstico")]: d.sql.testes })}
     </div>
 
-    <div class="cartao bloco-pergunta" style="margin-bottom:16px"><h2><span class="num">3</span>${T("Quanto pesa cada um e quanto disso é causa e não seleção?")}</h2>
+    <div class="cartao bloco-pergunta" id="pergunta-3" style="margin-bottom:16px"><h2><span class="num">3</span>${T("Quanto pesa cada um e quanto disso é causa e não seleção?")}</h2>
       <p class="resposta-curta">${r3}</p>
       <p class="ajuda">${T("Barra listrada: a diferença no retorno vista comparando todo mundo. Barra cheia: o que continua comparando pessoas parecidas, ou seja, o peso do próprio fator. Quando a listrada passa da cheia, essa sobra vinha do perfil de quem chega (seleção). Em pontos percentuais (p.p.).")}</p>
       ${graficoCausa(perfil)}
@@ -563,11 +564,11 @@ async function paginaResposta(el) {
       ${explicacao(T("A diferença “comparando todo mundo” mistura o efeito da característica com o perfil de quem a tem (tema, aparelho, idioma, horário e época). Comparando pessoas parecidas, sobra a parte que não se explica por esse perfil."), T("Barra listrada: diferença bruta de proporções; barra cheia: efeito marginal médio da regressão logística (o mesmo da pergunta 2). Parte que vinha do perfil = (bruto − ajustado) ÷ bruto."), { [T("Efeitos")]: d.sql.efeitos })}
     </div>
 
-    <h2 class="secao">${T("Os três achados e o que fazer")}</h2>
+    <h2 class="secao" id="achados">${T("Os três achados e o que fazer")}</h2>
     <div class="grade g3">${achados().map(cardAchado).join("")}</div>
 
     <div class="grade g2">
-      <div class="cartao"><h2>${T("O GPT-4 faz diferença ou é quem escolhe?")}</h2>
+      <div class="cartao" id="gpt4"><h2>${T("O GPT-4 faz diferença ou é quem escolhe?")}</h2>
         <p class="grande-frase">${T("Usar GPT-4 <b>não faz</b> as pessoas voltarem mais.")}</p>
         <p class="ajuda">${T("Uma dúvida comum: quem escolhe o GPT-4 talvez já seja mais engajado, e isso esconderia ou inflaria o efeito. Medimos de três jeitos, e nenhum mostra diferença comprovada:")}</p>
         <table><tr><th>${T("Forma de medir")}</th><th class="num">${T("Diferença no retorno")}</th></tr>
@@ -577,7 +578,7 @@ async function paginaResposta(el) {
         <p class="ajuda" style="margin-top:10px">${T("Todas as faixas vão de “alguns a menos” a “alguns a mais”: o efeito pode ser zero. E, como escolher ou não o GPT-4 dá o mesmo resultado, não há sinal de que “quem escolhe já volta mais”.")}</p>
         ${explicacao(T("Se o efeito viesse de quem escolhe, ele apareceria quando o GPT-4 era opcional e sumiria quando todos usavam. Os dois resultados são iguais e próximos de zero."), T("Diferença de proporções por regime de oferta (abr–jun/23 e nov/23: opcional; dez/23–abr/24: ~90% das conversas) e ponderação pelo inverso do escore de propensão (IPW) com época, horário, dia, dispositivo, idioma, tamanho da 1ª mensagem e tema; intervalos de 95% (Newcombe e bootstrap).") + (smd.length === 2 ? " " + T("No IPW, o maior desequilíbrio entre os grupos cai de {a} para {b} desvio-padrão.", { a: n1.format(smd[0]), b: n1.format(smd[1]) }) : ""), { "GPT-4": d.sql.gpt4 })}
       </div>
-      <div class="cartao"><h2>${sw ? T("A semana de {d}: por que o retorno caiu?", { d: DATA(sw.semana) }) : T("A semana analisada")}</h2>
+      <div class="cartao" id="semana"><h2>${sw ? T("A semana de {d}: por que o retorno caiu?", { d: DATA(sw.semana) }) : T("A semana analisada")}</h2>
         ${sw ? `<p class="ajuda">${T("Voltaram em até 7 dias, em % (a linha fina é a margem de erro):")}</p>
         ${barras100([{ nome: T("4 semanas anteriores"), valor: sw.retorno_antes_pct, lo: sw.antes_lo, hi: sw.antes_hi, cor: "var(--neutro)" }, { nome: T("Semana de {d}", { d: DIA_MES(sw.semana) }), valor: sw.retorno_semana_pct, lo: sw.semana_lo, hi: sw.semana_hi, cor: "var(--ruim)" }])}
         <p class="ajuda">${T("<b>A queda de {d} veio de quem chegou ou de como as pessoas voltaram?</b> Em pontos percentuais:", { d: DIA_MES(sw.semana) })}</p>
@@ -589,7 +590,7 @@ async function paginaResposta(el) {
       </div>
     </div>
 
-    <div class="cartao" style="margin-bottom:16px"><h2>${T("Retorno semana a semana")}</h2>
+    <div class="cartao" id="semanas" style="margin-bottom:16px"><h2>${T("Retorno semana a semana")}</h2>
       <p class="ajuda">${T("Cada ponto é uma semana de chegada. A faixa cinza mostra quanto o número oscila só por acaso, com cerca de 45 pessoas por semana: um ponto dentro dela não indica mudança real.")} ${sw ? T("A semana de {d} está destacada.", { d: DATA(sw.semana) }) : ""} ${T("Semanas com menos de 30 pessoas ficam sem ponto.")}</p>
       ${graficoSemanas(d.coortes, g.retorno_pct, sw ? sw.semana : null)}
       <div class="legenda"><span><i style="background:var(--marca)"></i>${T("semana dentro da faixa do acaso")}</span><span><i style="background:var(--atencao)"></i>${T("fora da faixa")}</span>${sw ? `<span><i style="background:var(--ruim)"></i>${T("semana analisada")}</span>` : ""}<span><i class="faixa" style="background:var(--fundo);border-color:var(--linha)"></i>${T("faixa do acaso")}</span><span><i class="linha"></i>${T("média da base")}</span></div>
@@ -597,23 +598,23 @@ async function paginaResposta(el) {
     </div>
 
     <div class="grade g2">
-      <div class="cartao"><h2>${T("Sinais de engajamento: descrevem o retorno, não o explicam")}</h2>
+      <div class="cartao" id="engajamento"><h2>${T("Sinais de engajamento: descrevem o retorno, não o explicam")}</h2>
         ${turnos && temas ? `<p>${T("Quem conversa 5 vezes ou mais no primeiro dia volta <b>{a}</b> (contra {b} de quem conversa menos), e quem usa mais de um tema volta <b>{c}</b> (contra {d}).", { a: P(turnos.retorno_pct), b: P(turnos.retorno_ref_pct), c: P(temas.retorno_pct), d: P(temas.retorno_ref_pct) })}</p>` : ""}
         <p class="ajuda">${T("Isso é consequência de uma boa primeira experiência, não algo que o produto ligue diretamente. Por isso fica fora da comparação acima.")}</p>
       </div>
-      <div class="cartao"><h2>${T("Insatisfação na primeira conversa")}</h2>
+      <div class="cartao" id="insatisfacao"><h2>${T("Insatisfação na primeira conversa")}</h2>
         ${t.insatisfacao ? `<p>${T("Entre quem mandou mais de uma mensagem, quem corrigiu, repetiu ou reclamou volta praticamente o mesmo que os demais: <b>{faixa}</b>. A diferença pode ser acaso.", { faixa: DIF_FAIXA(t.insatisfacao.lo, t.insatisfacao.hi) })}</p>` : ""}
         ${explicacao(T("Uma inteligência artificial marcou, nas conversas com mais de uma mensagem, quem corrigiu, repetiu ou reclamou da resposta. A marcação se repete em 93% dos casos quando refeita."), T("Mesmo modelo dos efeitos, só com quem mandou mais de uma mensagem ({n} pessoas); IC 95% pelo método delta; estabilidade da marcação: κ de Cohen = 0,93.", { n: t.insatisfacao ? N(t.insatisfacao.n) : "—" }), { [T("Testes")]: d.sql.testes })}
       </div>
     </div>
 
     <div class="grade g2">
-      <div class="cartao"><h2>${T("O número muda conforme a forma de medir?")}</h2>
+      <div class="cartao" id="sensibilidade"><h2>${T("O número muda conforme a forma de medir?")}</h2>
         <p class="ajuda">${T("Cada linha muda uma única regra de contagem. Quase nada muda, exceto contar quem volta <b>no mesmo dia</b>, que sobe bastante o número. Por isso deixamos claro qual regra usamos.")}</p>
         <div class="rolagem"><table><tr><th>${T("Regra")}</th><th class="num">${T("Retorno")}</th><th class="num">${T("Margem de erro")}</th></tr>
         ${d.sensibilidade.map((s) => `<tr${s.cenario.startsWith("referência") ? ' class="ref"' : ""}><td>${esc(regra(s.cenario))}</td><td class="num">${P(s.retorno_pct)}</td><td class="num">${esc(String(s.ic95 || "").replace(/(\d+[.,]\d)[–-](\d+[.,]\d)/, (_, a, b) => T("{a} a {b}", { a: P(Number(a.replace(",", "."))), b: P(Number(b.replace(",", "."))) })))}</td></tr>`).join("")}</table></div>
       </div>
-      <div class="cartao"><h2>${T("Como sabemos o tema de cada conversa?")}</h2><p>${comoClassificamos().simples}</p>
+      <div class="cartao" id="temas"><h2>${T("Como sabemos o tema de cada conversa?")}</h2><p>${comoClassificamos().simples}</p>
         <details><summary>${T("Detalhe técnico")}</summary><div class="tecnico">${comoClassificamos().tecnico}</div></details>
         <h2 style="margin-top:18px">${T("O que isto prova e o que não prova")}</h2>
         <p>${T("<b>Prova</b> que quem chega só testando ou pedindo imagem volta muito menos, e que o modelo não muda o retorno, mesmo considerando idioma, aparelho, horário, tema e época. <b>Não prova</b> que mudar a primeira experiência fará essas pessoas voltarem: pode haver motivos que os dados não mostram (motivação, necessidade). Por isso cada decisão vem com um teste A/B.")}</p>
@@ -636,7 +637,7 @@ async function paginaDocumentacao(el, _qs, nome) {
       <aside class="docs-indice" aria-label="${T("Documentos")}">${grupos.map((g) => `<h3>${esc(T(g))}</h3><ul>${lista.filter((x) => x.grupo === g).map((x) => `<li><a href="#documentacao/${x.nome}" ${x.nome === atual ? 'aria-current="page"' : ""}>${esc(T(x.titulo))}</a></li>`).join("")}</ul>`).join("")}</aside>
       <article class="cartao doc" lang="pt-BR">${doc.html}</article>
     </div>`;
-  window.scrollTo(0, 0);
+  window.scrollTo(0, 0);  // a seção pedida pela busca (?s=) é posicionada depois, em mostrar()
   return null;
 }
 const PAGINAS = { resposta: paginaResposta, explorar: paginaExplorar, documentacao: paginaDocumentacao };
@@ -662,17 +663,85 @@ async function mostrar() {
   const el = $("#conteudo");
   el.innerHTML = `<p class="estado">${T("Carregando…")}</p>`;
   try {
-    rodape(await PAGINAS[pagina](el, new URLSearchParams(qs || ""), sub));
+    const params = new URLSearchParams(qs || "");
+    rodape(await PAGINAS[pagina](el, params, sub));
     ligarDicas(el);
+    const alvo = params.get("ir") || params.get("s");
+    if (alvo) { const no = document.getElementById(alvo); if (no) no.scrollIntoView({ block: "start" }); }
   } catch (e) {
     el.innerHTML = `<p class="erro">${esc(e.message)}</p>`;
   }
+}
+
+// ---------- busca: telas e filtros na própria página; documentos no servidor (índice em memória) ----------
+const normalizar = (s) => String(s).normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const catalogoTelas = () => [
+  ["resposta", "cartoes", T("Voltam em até 7 dias"), "retorno margem erro pessoas analisadas mesmo dia definição voltar"],
+  ["resposta", "pergunta-1", T("O que faz uma pessoa que experimentou o assistente voltar em até 7 dias?"), "grupo pedido real celular computador gpt-4 gpt-3.5"],
+  ["resposta", "pergunta-2", T("Quais fatores têm o maior efeito no retorno?"), "efeito fator regressão ranking margem pontos percentuais"],
+  ["resposta", "pergunta-3", T("Quanto pesa cada um e quanto disso é causa e não seleção?"), "causa seleção perfil bruto ajustado a/b"],
+  ["resposta", "achados", T("Os três achados e o que fazer"), "recomendação decisão o que fazer"],
+  ["resposta", "gpt4", T("O GPT-4 faz diferença ou é quem escolhe?"), "modelo ipw propensão regime escolha"],
+  ["resposta", "semana", T("A semana analisada"), "20/11 queda kitagawa perfil taxa"],
+  ["resposta", "semanas", T("Retorno semana a semana"), "faixa do acaso coorte homogeneidade"],
+  ["resposta", "engajamento", T("Sinais de engajamento: descrevem o retorno, não o explicam"), "mediador turnos temas"],
+  ["resposta", "insatisfacao", T("Insatisfação na primeira conversa"), "reclamou corrigiu repetiu qualidade da resposta"],
+  ["resposta", "sensibilidade", T("O número muda conforme a forma de medir?"), "regra definição sessão fuso janela utc"],
+  ["resposta", "temas", T("Como sabemos o tema de cada conversa?"), "classificação ia llm kappa validação"],
+  ["explorar", "recorte", T("O que este recorte mostra"), "filtros frases"],
+  ["explorar", "retorno-mes", T("Retorno mês a mês"), "tendência"],
+  ["explorar", "novas-mes", T("Pessoas novas por mês"), "volume"],
+  ...["dispositivo", "idioma", "modelo", "tema"].map((x) => ["explorar", `grupo-${x}`, T("Quem volta mais? Por {dim}", { dim: dimMinuscula(x) }), ""]),
+  ["explorar", "chegada", T("Com que tema as pessoas chegam"), "conversas pessoas"],
+].map(([aba, id, titulo, extra]) => ({ titulo, sub: aba === "resposta" ? T("A resposta") : T("Explorar"), href: `#${aba}?ir=${id}`, busca: normalizar(`${titulo} ${extra}`) }));
+const VALORES = {
+  tema: ["estudo", "programacao", "reescrita", "marketing", "ficcao", "conhecimento", "vida_pratica", "imagem_midia", "burlar_regras", "saudacao_teste", "outro"],
+  idioma: ["português", "inglês", "outro"], dispositivo: ["celular", "computador"], modelo: ["GPT-4", "GPT-3.5"],
+};
+const catalogoFiltros = () => Object.entries(VALORES).flatMap(([d, vs]) => vs.map((v) => {
+  const nome = d === "idioma" && v === "outro" ? T("Outro idioma") : rot(v);
+  return { titulo: nome, sub: T("Ver no Explorar, filtrado por {dim}", { dim: dimMinuscula(d) }), href: `#explorar?${d}=${encodeURIComponent(v)}`, busca: normalizar(`${nome} ${v}`) };
+}));
+let buscaEspera = null, buscaPedido = null;
+function ligarBusca() {
+  const campo = $("#busca"), lista = $("#busca-resultados");
+  const fechar = () => { lista.hidden = true; };
+  const desenhar = (grupos) => {
+    const html = grupos.filter(([, itens]) => itens.length).map(([nome, itens]) => `<div class="grupo">${esc(nome)}</div>${itens.map((it) => `<a href="${esc(it.href)}"><b>${esc(it.titulo)}</b><small>${esc(it.sub)}</small></a>`).join("")}`).join("");
+    lista.innerHTML = html || `<p class="vazio">${T("Nada encontrado.")}</p>`;
+    lista.hidden = false;
+  };
+  campo.addEventListener("input", () => {
+    clearTimeout(buscaEspera);
+    const q = campo.value.trim();
+    if (q.length < 2) { fechar(); return; }
+    buscaEspera = setTimeout(async () => {  // espera a pessoa parar de digitar
+      const termos = normalizar(q).split(/\s+/).filter((x) => x.length >= 2);
+      const casa = (it) => termos.every((x) => it.busca.includes(x));
+      const telas = catalogoTelas().filter(casa).slice(0, 6), filtros = catalogoFiltros().filter(casa).slice(0, 4);
+      desenhar([[T("Nas telas"), telas], [T("Nos filtros"), filtros], [T("Nos documentos"), []]]);
+      if (buscaPedido) buscaPedido.abort();
+      buscaPedido = new AbortController();
+      try {
+        const docs = await (await fetch(`/api/busca?q=${encodeURIComponent(q)}`, { signal: buscaPedido.signal })).json();
+        if (campo.value.trim() !== q) return;
+        desenhar([[T("Nas telas"), telas], [T("Nos filtros"), filtros], [T("Nos documentos"), docs.map((x) => ({ titulo: x.secao, sub: `${T(x.titulo_documento)} · ${x.trecho}`, href: `#documentacao/${x.documento}${x.ancora ? `?s=${x.ancora}` : ""}` }))]]);
+      } catch (e) { /* busca cancelada por outra mais nova */ }
+    }, 250);
+  });
+  campo.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { fechar(); campo.blur(); }
+    if (e.key === "Enter") { const primeiro = $("a", lista); if (primeiro) { location.hash = primeiro.getAttribute("href").slice(1); fechar(); } }
+  });
+  lista.addEventListener("click", (e) => { if (e.target.closest("a")) fechar(); });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".busca")) fechar(); });
 }
 
 async function iniciar() {
   try { TRADUCOES = await (await fetch("/static/i18n.json")).json(); } catch (e) { TRADUCOES = {}; }  // sem o arquivo, a tela fica em português
   document.querySelectorAll("[data-lingua]").forEach((b) => b.addEventListener("click", () => trocarLingua(b.dataset.lingua)));
   aplicarLingua();
+  ligarBusca();
   mostrar();
 }
 

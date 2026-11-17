@@ -18,7 +18,7 @@ def _frases_da_tela() -> set[str]:
     js = (ESTATICO / "app.js").read_text()
     frases = {json.loads(f'"{m}"') for m in re.findall(r'\bT\("((?:[^"\\]|\\.)*)"', js)}
     html = (ESTATICO / "index.html").read_text()
-    frases |= set(re.findall(r'data-t(?:-aria)?="([^"]+)"', html))
+    frases |= set(re.findall(r'data-t(?:-aria|-placeholder)?="([^"]+)"', html))
     for grupo, titulo, _ in DOCUMENTOS.values():  # nomes que a API manda para o índice
         frases |= {grupo, titulo}
     return frases
