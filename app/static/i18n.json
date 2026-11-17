@@ -943,10 +943,6 @@
   "en": "Indicators",
   "es": "Indicadores"
  },
- "Incidente §4.2": {
-  "en": "Incident §4.2",
-  "es": "Incidente §4.2"
- },
  "Decisões de negócio (BDR)": {
   "en": "Business decisions (BDR)",
   "es": "Decisiones de negocio (BDR)"
@@ -1182,5 +1178,9 @@
  "retorno de cada grupo": {
   "en": "return of each group",
   "es": "retorno de cada grupo"
+ },
+ "Incidentes": {
+  "en": "Incidents",
+  "es": "Incidentes"
  }
 }

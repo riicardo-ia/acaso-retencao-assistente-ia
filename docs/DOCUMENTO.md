@@ -93,6 +93,15 @@ Proposto para a próxima versão: o acompanhamento em janela móvel de 4 semanas
 | Logs e métricas | CloudWatch | um lugar para a carga e a API |
 | Login (fora do escopo local) | Cognito no ALB | o cliente vê só o próprio dashboard |
 
+**Classificação portátil entre provedores de LLM.** A classificação de temas usa o LangChain (`init_chat_model`), e o provedor e o modelo são escolhidos só no `.env` (`LLM_PRIMARY_PROVIDER` e `LLM_PRIMARY_MODEL`), sem mudar código. Trocar de provedor é trocar duas linhas de configuração e rodar de novo a validação dos temas (`analise/validar_temas.py`), porque o modelo muda:
+
+| Provedor | Configuração | Situação |
+|---|---|---|
+| OpenAI (chave de API) | `openai` | usado na análise |
+| Amazon Bedrock (Claude, Llama, Mistral e outros) | `bedrock_converse` | pronto; é o caminho da entrega, com o LLM e o custo na AWS |
+| Claude pela API da Anthropic | `anthropic` | basta instalar `langchain-anthropic` |
+| Outros que o LangChain suporta (Google, Azure OpenAI, modelos locais) | o nome do provedor | basta instalar o pacote do provedor |
+
 **Modelo da base analítica** (schema `mart`, [`etl/sql/`](../etl/sql/)):
 
 | Objeto | Grão | Chave | Quem escreve → quem lê |
@@ -138,7 +147,7 @@ Documentação interativa em `/api/docs`.
 - **Backend:** log JSON por requisição (`request_id`, rota, status, duração).
 - **Tela:** o rodapé mostra a carga, a versão e se a reconciliação passou.
 
-**Próximo passo de rastreabilidade (desenhado, não implementado):** ligar cada número à sua origem por chaves. Uma tabela `usuarios` como dimensão, com chaves estrangeiras de `conversas`, `perfil_usuario` e `eventos`; cada evento com o `turn_identifier` da base bruta e o `conv_id` da conversa; `carga_id` em todas as tabelas; a carga que falha registrada numa transação separada; a versão igual ao commit e o hash dos arquivos de origem em `mart.cargas`; e o `request_id` no rodapé da tela. A cadeia fica: tela (`request_id`) → log da API → `mart.cargas` (commit, origem, reconciliação) → linha (`carga_id`) → evento (`turn_identifier`) → base bruta. Hoje a ligação com a base bruta já existe pela conversa (`conv_id` = 1º `turn_identifier`) e pela pessoa (o mesmo sal recalcula o pseudônimo a partir do `hashed_ip`).
+**Rastreabilidade completa:** desenhada, é um dos próximos passos (§7).
 
 **Como perceber a divergência antes do cliente:** a carga compara o retorno por coorte em SQL e em Python e **não publica** se divergir. Em produção, há ainda um alarme do CloudWatch para carga com erro ou para a razão "usuários ÷ IPs" fora do histórico (o sintoma do §4.2).
 
@@ -164,6 +173,16 @@ Cada push roda no CI (`.github/workflows/ci.yml`): ruff, formatação, mypy e os
 | Base pública sem conversas tóxicas | Retorno é limite inferior; **pedir** a base completa se o cliente a tiver |
 | Definição de "voltar" muda o número em 10 pp | **Validar com o cliente**: outro dia (18,4%) ou nova sessão (28,1%) |
 
-## 7. Uso de IA
+## 7. Próximos passos
+
+Desenhados e deixados fora desta entrega por prazo e risco: mexem na carga ou no banco a poucas horas da entrega.
+
+1. **Rastreabilidade completa por chaves.** ligar cada número à sua origem por chaves. Uma tabela `usuarios` como dimensão, com chaves estrangeiras de `conversas`, `perfil_usuario` e `eventos`; cada evento com o `turn_identifier` da base bruta e o `conv_id` da conversa; `carga_id` em todas as tabelas; a carga que falha registrada numa transação separada; a versão igual ao commit e o hash dos arquivos de origem em `mart.cargas`; e o `request_id` no rodapé da tela. A cadeia fica: tela (`request_id`) → log da API → `mart.cargas` (commit, origem, reconciliação) → linha (`carga_id`) → evento (`turn_identifier`) → base bruta. Hoje a ligação com a base bruta já existe pela conversa (`conv_id` = 1º `turn_identifier`) e pela pessoa (o mesmo sal recalcula o pseudônimo a partir do `hashed_ip`).
+2. **Robustez estatística extra:** o E-value dos achados (quão forte teria de ser um fator não medido para apagar o efeito) e a correção para várias comparações ao mesmo tempo.
+3. **Outros países:** o fuso por país (ou por estado, onde houver vários), a coluna `pais` em todas as tabelas e uma tela de comparação pelos efeitos com margem de erro.
+4. **Tempo medido no navegador**, além do tempo do servidor que já é medido.
+5. **Com o cliente** (§6): identificador de usuário, testes A/B dos achados 1 e 3, a base com as conversas tóxicas e qual definição de "voltar" vale.
+
+## 8. Uso de IA
 
 Usei o Claude Code (Anthropic) como par de desenvolvimento em todas as etapas: discovery, análise, código da carga, da API e das telas, e redação dos documentos. Usei a API da OpenAI (gpt-5.4 e gpt-5.4-nano, via LangChain) só para classificar o tema das conversas. Conferi tudo o que a IA gerou, da análise à tela, e corrigi o que não se sustentava. A correção mais importante foi no tema: a IA classificava cada conversa pela primeira mensagem, que muitas vezes é só um "oi" antes do pedido real, e passei a classificar pela conversa inteira. Também corrigi a definição de retorno (a proposta de "nova sessão depois de 30 minutos" virou uso em outro dia de calendário, como o enunciado indica, e o número foi de 28,1% para 18,4%), descartei a variável "alguma recusa no 1º dia" (criava um efeito falso, porque sobe com o número de respostas), troquei o classificador menor pelo maior depois de revisar as discordâncias e defini a chave da conversa pelo primeiro `turn_identifier`, porque o `conversation_hash` se repete entre pessoas diferentes. A cada carga, o retorno calculado em SQL é comparado com o calculado em Python, e a carga não é publicada se divergirem. Dediquei cerca de 14 horas ao desafio.

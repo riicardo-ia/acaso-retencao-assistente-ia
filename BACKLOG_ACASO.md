@@ -156,9 +156,9 @@
 
 | ID | Requisito | Evidência | Prior. | Etapa | Status |
 |---|---|---|---|---|---|
-| DO-5-01 | Quais ferramentas de IA foram usadas e para quê | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §7 |
-| DO-5-02 | O que foi conferido, corrigido ou descartado | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §7 |
-| DO-5-03 | Horas dedicadas | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §7 |
+| DO-5-01 | Quais ferramentas de IA foram usadas e para quê | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §8 |
+| DO-5-02 | O que foi conferido, corrigido ou descartado | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §8 |
+| DO-5-03 | Horas dedicadas | Parágrafo no documento | P1 | E7 | feito · DOCUMENTO §8 |
 
 ### D2 · Forma da entrega
 

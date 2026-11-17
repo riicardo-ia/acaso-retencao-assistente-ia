@@ -1,4 +1,4 @@
-# Incidente §4.2 · "o retorno da semana de 20/11/2023 caiu de 31% para 18%"
+# Incidentes · "o retorno da semana de 20/11/2023 caiu de 31% para 18%"
 
 ## O sintoma, em números
 

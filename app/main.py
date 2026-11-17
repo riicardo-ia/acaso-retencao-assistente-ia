@@ -34,7 +34,7 @@ REPOSITORIO = "https://github.com/riicardo-ia/acaso-retencao-assistente-ia"
 DOCUMENTOS: dict[str, tuple[str, str, str]] = {
     "documento": ("Resumo", "Documento final", "DOCUMENTO.md"),
     "indicadores": ("Resumo", "Indicadores", "indicadores.md"),
-    "incidente": ("Resumo", "Incidente §4.2", "incidente-4.2.md"),
+    "incidente": ("Resumo", "Incidentes", "incidente-4.2.md"),
     "bdr-001": (
         "Decisões de negócio (BDR)",
         "BDR-001 · Definições de uso e retorno",
