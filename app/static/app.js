@@ -87,8 +87,10 @@ const comoClassificamos = () => ({
   </ul>`,
 });
 
+let ULTIMO_PEDIDO = "";  // código do pedido (request_id): o mesmo que aparece no log do servidor
 async function api(rota) {
   const r = await fetch(rota);
+  ULTIMO_PEDIDO = r.headers.get("x-request-id") || "";
   if (!r.ok) throw new Error(r.status === 400 ? T("Filtro inválido. Use o botão Limpar.") : T("A consulta falhou ({status}). Tente recarregar a página.", { status: r.status }));
   return r.json();
 }
@@ -646,7 +648,7 @@ function rodape(p) {
   if (!p) { $("#rodape").innerHTML = ""; return; }
   $("#rodape").innerHTML = `<b>${T("Fonte:")}</b> ${T("WildChat-1M (allenai), conversas com country = 'Brazil'")} · ${T("{a} conversas do Brasil, de {b} na base", { a: N(p.linhas_brasil), b: N(p.linhas_fonte) })} ·
     <b>${T("Atualizado em")}</b> ${new Date(p.carga_em).toLocaleString(LOCAIS[LINGUA])} (${T("versão")} ${esc(p.versao_codigo)}) ·
-    ${p.reconciliacao_ok ? T("números conferidos contra a base bruta ✓") : `<b>${T("ATENÇÃO: a conferência contra a base bruta falhou")}</b>`}<br>
+    ${p.reconciliacao_ok ? T("números conferidos contra a base bruta ✓") : `<b>${T("ATENÇÃO: a conferência contra a base bruta falhou")}</b>`}${ULTIMO_PEDIDO ? ` · ${T("código do pedido")} <code>${esc(ULTIMO_PEDIDO)}</code>` : ""}<br>
     <b>${T("Definição:")}</b> ${T("Voltou = usou o assistente em outro dia (horário de São Paulo), entre o 1º e o 7º dia depois do primeiro dia de uso. Pessoa = endereço de internet (IP), anonimizado.")} ${T("Nenhuma tela mostra texto de conversa, IP ou navegador, nem números de grupos com menos de 30 pessoas.")}`;
 }
 

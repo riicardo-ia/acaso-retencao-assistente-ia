@@ -1218,5 +1218,9 @@
  "Arquitetura AWS": {
   "en": "AWS architecture",
   "es": "Arquitectura AWS"
+ },
+ "código do pedido": {
+  "en": "request code",
+  "es": "código de la solicitud"
  }
 }

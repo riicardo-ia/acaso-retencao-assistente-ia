@@ -150,7 +150,7 @@ Documentação interativa em `/api/docs`.
 - **Carga:** `mart.cargas` com versão do código, linhas na fonte, no Brasil e carregadas, usuários, retorno, reconciliação e duração.
 - **Base:** migrações numeradas com a decisão comentada no topo.
 - **Backend:** log JSON por requisição (`request_id`, rota, status, duração).
-- **Tela:** o rodapé mostra a carga, a versão e se a reconciliação passou.
+- **Tela:** o rodapé mostra a carga, a versão, se a reconciliação passou e o **código do pedido** (`request_id`), o mesmo que fica no log do servidor. Com um print da tela, chega-se direto ao registro daquela consulta.
 
 **Rastreabilidade completa:** desenhada, é um dos próximos passos (§7).
 
@@ -182,7 +182,7 @@ Cada push roda no CI (`.github/workflows/ci.yml`): ruff, formatação, mypy e os
 
 Desenhados e deixados fora desta entrega por prazo e risco: mexem na carga ou no banco a poucas horas da entrega.
 
-1. **Rastreabilidade completa por chaves.** ligar cada número à sua origem por chaves. Uma tabela `usuarios` como dimensão, com chaves estrangeiras de `conversas`, `perfil_usuario` e `eventos`; cada evento com o `turn_identifier` da base bruta e o `conv_id` da conversa; `carga_id` em todas as tabelas; a carga que falha registrada numa transação separada; a versão igual ao commit e o hash dos arquivos de origem em `mart.cargas`; e o `request_id` no rodapé da tela. A cadeia fica: tela (`request_id`) → log da API → `mart.cargas` (commit, origem, reconciliação) → linha (`carga_id`) → evento (`turn_identifier`) → base bruta. Hoje a ligação com a base bruta já existe pela conversa (`conv_id` = 1º `turn_identifier`) e pela pessoa (o mesmo sal recalcula o pseudônimo a partir do `hashed_ip`).
+1. **Rastreabilidade completa por chaves.** ligar cada número à sua origem por chaves. Uma tabela `usuarios` como dimensão, com chaves estrangeiras de `conversas`, `perfil_usuario` e `eventos`; cada evento com o `turn_identifier` da base bruta e o `conv_id` da conversa; `carga_id` em todas as tabelas; a carga que falha registrada numa transação separada; e a versão igual ao commit e o hash dos arquivos de origem em `mart.cargas`. A cadeia fica: tela (`request_id`) → log da API → `mart.cargas` (commit, origem, reconciliação) → linha (`carga_id`) → evento (`turn_identifier`) → base bruta. Hoje a ligação com a base bruta já existe pela conversa (`conv_id` = 1º `turn_identifier`) e pela pessoa (o mesmo sal recalcula o pseudônimo a partir do `hashed_ip`).
 2. **Robustez estatística extra:** o E-value dos achados (quão forte teria de ser um fator não medido para apagar o efeito) e a correção para várias comparações ao mesmo tempo.
 3. **Outros países:** o fuso por país (ou por estado, onde houver vários), a coluna `pais` em todas as tabelas e uma tela de comparação pelos efeitos com margem de erro.
 4. **Tempo medido no navegador**, além do tempo do servidor que já é medido.
