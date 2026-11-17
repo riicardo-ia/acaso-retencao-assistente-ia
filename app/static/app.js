@@ -11,7 +11,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const LOCAIS = { pt: "pt-BR", en: "en-US", es: "es-ES" };
 let TRADUCOES = {};
 let PREFERIDA = escolherLingua();  // a escolhida pela pessoa (lembrada no navegador)
-let LINGUA = PREFERIDA;            // a da página aberta: a Documentação é sempre em português
+let LINGUA = PREFERIDA;
 let n0, n1;
 function escolherLingua() {
   const pedida = new URLSearchParams(location.search).get("lang");  // link já no idioma: /?lang=en
@@ -630,14 +630,14 @@ async function paginaDocumentacao(el, _qs, nome) {
   $("#filtros").hidden = true;
   const lista = await api("/api/documentos");
   const atual = lista.some((x) => x.nome === nome) ? nome : lista[0].nome;
-  const doc = await api(`/api/documentos/${encodeURIComponent(atual)}`);
+  const doc = await api(`/api/documentos/${encodeURIComponent(atual)}?lang=${LINGUA}`);
   const grupos = [...new Set(lista.map((x) => x.grupo))];
   el.innerHTML = `
     <h1>${T("Documentação")}</h1>
     <p class="pergunta">${T("As decisões, a análise passo a passo, os indicadores e a arquitetura, como estão no repositório.")}</p>
     <div class="docs">
       <aside class="docs-indice" aria-label="${T("Documentos")}">${grupos.map((g) => `<h3>${esc(T(g))}</h3><ul>${lista.filter((x) => x.grupo === g).map((x) => `<li><a href="#documentacao/${x.nome}" ${x.nome === atual ? 'aria-current="page"' : ""}>${esc(T(x.titulo))}</a></li>`).join("")}</ul>`).join("")}</aside>
-      <article class="cartao doc" lang="pt-BR">${doc.html}</article>
+      <article class="cartao doc">${doc.html}</article>
     </div>`;
   window.scrollTo(0, 0);  // a seção pedida pela busca (?s=) é posicionada depois, em mostrar()
   return null;
@@ -658,10 +658,7 @@ async function mostrar() {
   const aba = bruta === "analise" ? "resposta" : bruta;  // endereço antigo da tela
   const pagina = PAGINAS[aba] ? aba : "resposta";
   document.querySelectorAll("nav a").forEach((a) => (a.dataset.aba === pagina ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
-  // os documentos são só em português: a página abre em português e sem o seletor de idioma
-  const lingua = pagina === "documentacao" ? "pt" : PREFERIDA;
-  if (lingua !== LINGUA) { LINGUA = lingua; aplicarLingua(); }
-  $(".linguas").hidden = pagina === "documentacao";
+  if (PREFERIDA !== LINGUA) { LINGUA = PREFERIDA; aplicarLingua(); }
   const el = $("#conteudo");
   el.innerHTML = `<p class="estado">${T("Carregando…")}</p>`;
   try {
@@ -725,7 +722,7 @@ function ligarBusca() {
       if (buscaPedido) buscaPedido.abort();
       buscaPedido = new AbortController();
       try {
-        const docs = await (await fetch(`/api/busca?q=${encodeURIComponent(q)}`, { signal: buscaPedido.signal })).json();
+        const docs = await (await fetch(`/api/busca?q=${encodeURIComponent(q)}&lang=${LINGUA}`, { signal: buscaPedido.signal })).json();
         if (campo.value.trim() !== q) return;
         desenhar([[T("Nas telas"), telas], [T("Nos filtros"), filtros], [T("Nos documentos"), docs.map((x) => ({ titulo: x.secao, sub: `${T(x.titulo_documento)} · ${x.trecho}`, href: `#documentacao/${x.documento}${x.ancora ? `?s=${x.ancora}` : ""}` }))]]);
       } catch (e) { /* busca cancelada por outra mais nova */ }

@@ -4,9 +4,12 @@ A tela usa o português como chave (T("texto")); se alguém escrever uma frase n
 esquecer a tradução, este teste diz qual é.
 """
 
+import hashlib
 import json
 import re
 from pathlib import Path
+
+import pytest
 
 from app.main import DOCUMENTOS
 
@@ -43,3 +46,32 @@ def test_traducao_tem_os_mesmos_valores() -> None:
         assert set(linguas) == {"en", "es"}, pt
         for lingua in ("en", "es"):
             assert _valores(linguas[lingua]) == _valores(pt), (pt, lingua)
+
+
+# Documentos: a tradução existe, guarda a impressão digital do original em português e tem
+# a mesma estrutura (títulos e alvos dos links e imagens). Se o português mudar e a tradução
+# não, o teste aponta qual arquivo atualizar.
+
+DOCS = Path(__file__).parents[1] / "docs"
+ORIGEM = re.compile(r"<!-- traduzido de: ([0-9a-f]{12}) -->")
+
+
+def _impressao(texto: str) -> str:
+    return hashlib.sha256(texto.encode()).hexdigest()[:12]
+
+
+@pytest.mark.parametrize("lingua", ["en", "es"])
+@pytest.mark.parametrize("arquivo", [a for _, _, a in DOCUMENTOS.values()])
+def test_documento_traduzido_e_em_dia(lingua: str, arquivo: str) -> None:
+    original = (DOCS / arquivo).read_text()
+    traducao = DOCS / lingua / arquivo
+    assert traducao.exists(), f"falta a tradução {traducao.relative_to(DOCS.parent)}"
+    texto = traducao.read_text()
+    marca = ORIGEM.search(texto)
+    assert marca and marca[1] == _impressao(
+        original
+    ), f"docs/{arquivo} mudou em português: atualize docs/{lingua}/{arquivo}"
+    titulos = re.compile(r"^#{1,3} ", re.M)
+    assert len(titulos.findall(texto)) == len(titulos.findall(original))
+    alvos = re.compile(r"\]\(([^)]+)\)")
+    assert sorted(alvos.findall(texto)) == sorted(alvos.findall(original))

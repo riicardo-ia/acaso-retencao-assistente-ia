@@ -333,35 +333,50 @@ def documentos() -> list[dict[str, str]]:
     return [{"nome": n, "grupo": g, "titulo": t} for n, (g, t, _) in DOCUMENTOS.items()]
 
 
+def _validar_lingua(lang: str) -> None:
+    if lang not in insights.LINGUAS:
+        raise HTTPException(400, "idioma da tela inválido (use pt, en ou es)")
+
+
+def _arquivo(arquivo: str, lang: str) -> Path:
+    """O documento no idioma da tela: as traduções ficam em docs/en e docs/es."""
+    traduzido = DOCS / lang / arquivo
+    return traduzido if lang != "pt" and traduzido.exists() else DOCS / arquivo
+
+
 @app.get("/api/documentos/{nome}")
-def documento(nome: str) -> dict[str, str]:
-    """Um documento da lista, convertido de Markdown para HTML no servidor."""
+def documento(nome: str, lang: str = "pt") -> dict[str, str]:
+    """Um documento da lista, no idioma da tela, convertido de Markdown para HTML no servidor."""
+    _validar_lingua(lang)
     if nome not in DOCUMENTOS:
         raise HTTPException(404, "documento não encontrado")
     _, titulo, arquivo = DOCUMENTOS[nome]
-    caminho = DOCS / arquivo
+    original = DOCS / arquivo  # links e imagens são resolvidos a partir do original
     html = markdown.markdown(
-        caminho.read_text(), extensions=["tables", "fenced_code", "toc"]
+        _arquivo(arquivo, lang).read_text(),
+        extensions=["tables", "fenced_code", "toc"],
     )
     html = re.sub(
         r'(href|src)="([^"]+)"',
-        lambda m: f'{m[1]}="{_link(m[2], caminho.parent)}"',
+        lambda m: f'{m[1]}="{_link(m[2], original.parent)}"',
         html,
     )
     return {"nome": nome, "titulo": titulo, "html": html}
 
 
 @lru_cache(maxsize=256)
-def _buscar(consulta: str) -> list[dict[str, str]]:
+def _buscar(consulta: str, lang: str) -> list[dict[str, str]]:
     return busca.buscar(
-        consulta, tuple((n, t, DOCS / a) for n, (_, t, a) in DOCUMENTOS.items())
+        consulta,
+        tuple((n, t, _arquivo(a, lang)) for n, (_, t, a) in DOCUMENTOS.items()),
     )
 
 
 @app.get("/api/busca")
-def buscar(q: str = "") -> list[dict[str, str]]:
-    """Busca nos documentos, por seção. As telas e os filtros são buscados na própria página."""
-    return _buscar(q.strip()[:80])
+def buscar(q: str = "", lang: str = "pt") -> list[dict[str, str]]:
+    """Busca nos documentos do idioma da tela, por seção. Telas e filtros são buscados na página."""
+    _validar_lingua(lang)
+    return _buscar(q.strip()[:80], lang)
 
 
 @app.get("/api/explorar")
@@ -378,8 +393,7 @@ def explorar(
 
     `lang` é o idioma da tela (pt, en ou es), usado só nas frases; `idioma` é o filtro
     pelo idioma da conversa."""
-    if lang not in insights.LINGUAS:
-        raise HTTPException(400, "idioma da tela inválido (use pt, en ou es)")
+    _validar_lingua(lang)
     valores = {
         "idioma": idioma,
         "dispositivo": dispositivo,

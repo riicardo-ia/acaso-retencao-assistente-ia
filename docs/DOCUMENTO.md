@@ -2,7 +2,7 @@
 
 **Pergunta do cliente:** o que faz uma pessoa que experimentou o assistente voltar a usá-lo em até 7 dias? Quais fatores têm o maior efeito, quanto pesa cada um e quanto disso é causa e não seleção?
 **Base:** WildChat-1M, conversas com `country = 'Brazil'`: 11.621 conversas, 2.266 pessoas novas elegíveis (abr/2023–abr/2024).
-**Detalhe de cada etapa:** [`docs/analise/`](analise/) (qualidade, definições, variáveis, EDA, temas, análise) · decisões: [`docs/bdr/`](bdr/), [`docs/adr/`](adr/) · incidente: [`docs/incidente-4.2.md`](incidente-4.2.md).
+**Detalhe de cada etapa:** [`docs/analise/`](analise/) (qualidade, definições, variáveis, EDA, temas, análise) · decisões: [`docs/bdr/`](bdr/), [`docs/adr/`](adr/) · incidentes: [`docs/incidente-4.2.md`](incidente-4.2.md) · arquitetura AWS: [`docs/arquitetura-aws.md`](arquitetura-aws.md).
 
 ## 1. A resposta
 
@@ -48,7 +48,7 @@ Sobe com `docker compose up --build` e abre em `http://localhost:8000`. É um **
 | **A resposta** (abre primeiro; fixa, base inteira) | As três perguntas do cliente, cada uma com um gráfico próprio | No topo, três cartões em %: o retorno (18,4%, margem de 16,8% a 20,0%), as pessoas analisadas e o retorno se a volta no mesmo dia contasse (28,1%). Depois, um bloco por pergunta, com a pergunta como título e a resposta em uma frase: **1. O que faz voltar?** barras com o retorno de cada grupo em %, com margem de erro e a média de todos (comparação simples, avisada na tela); **2. Quais fatores têm o maior efeito?** ranking dos efeitos em pontos percentuais, comparando pessoas parecidas, com a margem de erro (a linha que cruza o zero mostra o que não faz diferença); **3. Quanto pesa cada um e quanto é causa e não seleção?** duas barras sobrepostas por fator: a listrada é a diferença comparando todo mundo, a cheia é o que continua comparando pessoas parecidas; a sobra listrada é seleção, e a tela lembra que causa só se prova com teste A/B. Em seguida, os 3 achados com "o que fazer", GPT-4 por três formas de medir, a semana de 20/11 (perfil × retorno), o retorno semana a semana com a faixa do acaso, mediadores, insatisfação, sensibilidade às regras e como os temas foram classificados. Termos técnicos só no detalhe recolhível |
 | **Explorar** (com filtros: período do 1º uso, idioma, dispositivo, tema da 1ª conversa, modelo) | Neste recorte, quantos voltam, como isso evoluiu e quem volta mais? | Números principais; **linha** do retorno mês a mês com a margem de erro sombreada (tendência); **colunas** de pessoas novas por mês (volume); **barras horizontais** por idioma, dispositivo, modelo e tema (comparar grupos); barras lado a lado "% das pessoas × % das conversas" por tema (peso de quem usa muito). Frases por regra que mudam com o filtro |
 
-**Documentação.** Um terceiro link no topo abre, dentro do próprio dashboard, os documentos do repositório: este documento, os BDRs e ADRs, a análise passo a passo, os indicadores e o incidente. Só são servidos os arquivos de uma lista fechada, convertidos de Markdown no servidor.
+**Documentação.** Um terceiro link no topo abre, dentro do próprio dashboard, os documentos do repositório: este documento, os indicadores, os incidentes, a arquitetura AWS, os BDRs e ADRs e a análise passo a passo, no idioma da tela (português, inglês ou espanhol). Só são servidos os arquivos de uma lista fechada, convertidos de Markdown no servidor.
 
 **Busca.** Um campo no topo procura nas telas (leva direto ao bloco), nos valores dos filtros (abre o Explorar já filtrado) e em todos os documentos, por seção (abre o documento na seção, com um trecho). Telas e filtros são buscados na própria página; os documentos, num índice montado uma vez no servidor e guardado em memória, sem consulta ao banco. A busca ignora acentos e maiúsculas, espera a pessoa parar de digitar e leva menos de 1 ms no servidor.
 
@@ -126,14 +126,14 @@ Detalhe de cada serviço, dos caminhos de uma carga e de uma visita, rede, segur
 | `GET /api/explorar` | `inicio`, `fim` (AAAA-MM-DD) e `idioma`, `dispositivo`, `tema`, `modelo` (opcionais; valor fora da lista → 400); `lang` = idioma da tela (`pt`, `en` ou `es`, usado nas frases) | recorte e base com margem de erro, série mensal, retorno por grupo nas 4 dimensões, chegada por tema, frases, opções dos filtros, procedência, SQL |
 | `GET /api/analise` | — | retorno geral e por semana, efeitos bruto e ajustado com IC, GPT-4 por três métodos, decomposição da semana, sensibilidade, testes, procedência, SQL |
 | `GET /api/documentos` | — | índice da Documentação: nome, grupo e título de cada documento |
-| `GET /api/documentos/{nome}` | nome de um documento da lista (fora dela → 404) | título e HTML do documento, com os links internos apontando para a própria página |
-| `GET /api/busca` | `q` (o que foi digitado) | até 8 seções de documentos: documento, seção, âncora e um trecho |
+| `GET /api/documentos/{nome}` | nome de um documento da lista (fora dela → 404) e `lang` (`pt`, `en` ou `es`) | título e HTML do documento, com os links internos apontando para a própria página |
+| `GET /api/busca` | `q` (o que foi digitado) e `lang` | até 8 seções de documentos do idioma da tela: documento, seção, âncora e um trecho |
 | `GET /healthz` | — | `{"status": "ok"}` |
 
 Documentação interativa em `/api/docs`.
 
 **Outros países.**
-- **Interface: pronta.** A tela já está em português, inglês e espanhol (seletor no topo, ou `/?lang=en`). Cada texto passa por uma função de tradução com o português como chave; as traduções ficam em `app/static/i18n.json`, e `tests/test_traducoes.py` falha se uma frase nova ficar sem tradução. Números e datas seguem o formato de cada idioma, e as frases automáticas vêm da API no idioma da tela (`lang`). Os documentos continuam em português: a página Documentação abre sempre em português, sem o seletor de idioma.
+- **Interface: pronta.** A tela já está em português, inglês e espanhol (seletor no topo, ou `/?lang=en`). Cada texto passa por uma função de tradução com o português como chave; as traduções ficam em `app/static/i18n.json`, e `tests/test_traducoes.py` falha se uma frase nova ficar sem tradução. Números e datas seguem o formato de cada idioma, e as frases automáticas vêm da API no idioma da tela (`lang`). Os documentos também estão nos três idiomas: o original em português fica em `docs/`, as traduções em `docs/en` e `docs/es`, e cada tradução guarda a impressão digital do original; se o português mudar e a tradução não, `tests/test_traducoes.py` falha.
 - **Fuso: ainda fixo.** É o ponto crítico, porque o retorno é por dia local. Hoje `'America/Sao_Paulo'` está em `vw_usuarios` e no banco. Para outros países, o fuso vira coluna por país (ou por estado, para países com vários, como o próprio Brasil), usada em `vw_usuarios` no lugar da constante.
 - **Comparação: ainda não existe.** `pais` entra como dimensão em todas as tabelas do `mart` e nas rotas (`?pais=`). O modelo de efeitos roda por país, e os países são comparados pelos efeitos com IC, não por taxas brutas, porque o perfil de chegada muda entre eles.
 - **Temas:** precisam de revalidação por idioma.
@@ -160,7 +160,8 @@ Documentação interativa em `/api/docs`.
 - `tests/test_definicoes.py`: quem é a pessoa (o mesmo IP com navegadores diferentes é a mesma pessoa), 1º dia, retorno D+1..D+7, fuso e cortes;
 - `tests/test_estrutura.py`: a **definição do retorno congelada** (o hash da view e da margem de erro no banco; se mudar, o teste quebra e pede a revisão do BDR-001), migração aplicada nunca editada e o papel do dashboard só lendo o `mart`;
 - `tests/test_variaveis.py`, `tests/test_classificar.py` e `tests/test_efeitos.py` (o modelo recupera um efeito plantado em dados sintéticos);
-- `tests/test_api.py` e `tests/test_insights.py`: contrato das rotas, validação dos filtros, nenhum número de grupo com menos de 30 pessoas e as frases automáticas;
+- `tests/test_api.py` e `tests/test_insights.py`: contrato das rotas, validação dos filtros, nenhum número de grupo com menos de 30 pessoas, as frases automáticas e a busca (acha a seção certa e é rápida);
+- `tests/test_traducoes.py`: nenhuma frase da tela sem tradução e nenhum documento traduzido desatualizado em relação ao original;
 - `tests/test_explorar_dados.py`: integração com o banco carregado, que confere que sem filtro o número é o oficial, que as partes somam o todo e que, em filtros sorteados, o SQL bate com um cálculo independente em Python.
 
 Cada push roda no CI (`.github/workflows/ci.yml`): ruff, formatação, mypy e os testes, com um Postgres que recebe os papéis e as migrações. A integração com os dados reais roda localmente, com o compose.
@@ -182,7 +183,7 @@ Cada push roda no CI (`.github/workflows/ci.yml`): ruff, formatação, mypy e os
 
 Desenhados e deixados fora desta entrega por prazo e risco: mexem na carga ou no banco a poucas horas da entrega.
 
-1. **Rastreabilidade completa por chaves.** ligar cada número à sua origem por chaves. Uma tabela `usuarios` como dimensão, com chaves estrangeiras de `conversas`, `perfil_usuario` e `eventos`; cada evento com o `turn_identifier` da base bruta e o `conv_id` da conversa; `carga_id` em todas as tabelas; a carga que falha registrada numa transação separada; e a versão igual ao commit e o hash dos arquivos de origem em `mart.cargas`. A cadeia fica: tela (`request_id`) → log da API → `mart.cargas` (commit, origem, reconciliação) → linha (`carga_id`) → evento (`turn_identifier`) → base bruta. Hoje a ligação com a base bruta já existe pela conversa (`conv_id` = 1º `turn_identifier`) e pela pessoa (o mesmo sal recalcula o pseudônimo a partir do `hashed_ip`).
+1. **Rastreabilidade completa por chaves.** Ligar cada número à sua origem por chaves. Uma tabela `usuarios` como dimensão, com chaves estrangeiras de `conversas`, `perfil_usuario` e `eventos`; cada evento com o `turn_identifier` da base bruta e o `conv_id` da conversa; `carga_id` em todas as tabelas; a carga que falha registrada numa transação separada; e a versão igual ao commit e o hash dos arquivos de origem em `mart.cargas`. A cadeia fica: tela (`request_id`) → log da API → `mart.cargas` (commit, origem, reconciliação) → linha (`carga_id`) → evento (`turn_identifier`) → base bruta. Hoje a ligação com a base bruta já existe pela conversa (`conv_id` = 1º `turn_identifier`) e pela pessoa (o mesmo sal recalcula o pseudônimo a partir do `hashed_ip`).
 2. **Robustez estatística extra:** o E-value dos achados (quão forte teria de ser um fator não medido para apagar o efeito) e a correção para várias comparações ao mesmo tempo.
 3. **Outros países:** o fuso por país (ou por estado, onde houver vários), a coluna `pais` em todas as tabelas e uma tela de comparação pelos efeitos com margem de erro.
 4. **Tempo medido no navegador**, além do tempo do servidor que já é medido.

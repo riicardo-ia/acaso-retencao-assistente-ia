@@ -364,3 +364,21 @@ def test_ancora_da_busca_existe_no_documento(cliente: TestClient) -> None:
     achado = cliente.get("/api/busca?q=premissas").json()[0]
     html = cliente.get(f"/api/documentos/{achado['documento']}").json()["html"]
     assert f'id="{achado["ancora"]}"' in html
+
+
+def test_documento_no_idioma_da_tela(cliente: TestClient) -> None:
+    d = cliente.get("/api/documentos/documento?lang=en").json()
+    assert '<h2 id="1-the-answer">1. The answer</h2>' in d["html"]
+    # links e imagens continuam resolvidos a partir do original
+    assert 'href="#documentacao/bdr-001"' in d["html"]
+    assert 'src="/documentacao/arquivos/img/arquitetura.svg"' in d["html"]
+    es = cliente.get("/api/documentos/eda?lang=es").json()["html"]
+    assert 'src="/documentacao/arquivos/analise/img/01-uso-no-tempo.png"' in es
+    assert cliente.get("/api/documentos/documento?lang=fr").status_code == 400
+
+
+def test_busca_no_idioma_da_tela(cliente: TestClient) -> None:
+    en = cliente.get("/api/busca?q=assumptions&lang=en").json()
+    assert en and en[0]["documento"] == "documento"
+    assert cliente.get("/api/busca?q=assumptions&lang=pt").json() == []
+    assert cliente.get("/api/busca?q=fuso&lang=fr").status_code == 400

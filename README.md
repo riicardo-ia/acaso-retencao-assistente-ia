@@ -65,6 +65,7 @@ app/            API FastAPI e telas (HTML/CSS/JS, gráficos em SVG próprio)
 db/init/        papéis do Postgres (o app só lê o schema mart)
 data/seed/      temas classificados por LLM e rótulos da validação, sem conteúdo de conversa
 docs/           documento final, arquitetura AWS, análise passo a passo, BDRs, ADRs e incidentes
+                (original em português; traduções em docs/en e docs/es)
 tests/          testes que travam as definições e o contrato da API
 ```
 

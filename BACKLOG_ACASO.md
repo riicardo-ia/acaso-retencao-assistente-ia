@@ -104,7 +104,7 @@
 | IN-3.3-12 | *(extra)* Layout responsivo, identidade visual da Acaso, gráficos comuns e linguagem simples | Telas | P1 | E6 | feito |
 | IN-3.3-13 | *(extra)* As três perguntas do cliente respondidas no topo, uma por bloco: o que faz voltar (retorno por grupo), quais fatores (efeitos com margem de erro) e quanto é causa e não seleção (bruto × ajustado) | Tela A resposta | P0 | E6 | feito |
 | IN-3.3-14 | *(extra)* Retorno semana a semana com a faixa do acaso e a semana analisada em destaque | Tela A resposta | P1 | E6 | feito |
-| IN-3.3-15 | *(extra)* Telas em português, inglês e espanhol, com teste que impede frase sem tradução | Seletor no topo e `i18n.json` | P1 | E6 | feito · `tests/test_traducoes.py` |
+| IN-3.3-15 | *(extra)* Telas e documentos em português, inglês e espanhol, com testes que impedem frase sem tradução e documento traduzido desatualizado | Seletor no topo e `i18n.json` | P1 | E6 | feito · `tests/test_traducoes.py` |
 | IN-3.3-16 | *(extra)* Documentação dentro do dashboard (decisões, análise, indicadores, arquitetura) | Página Documentação | P1 | E6 | feito |
 
 ### B4 · §1 Usuário final

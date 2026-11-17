@@ -29,7 +29,7 @@ def _texto_simples(markdown: str) -> str:
     return re.sub(r"\s+", " ", texto).strip()
 
 
-@lru_cache(maxsize=1)
+@lru_cache(maxsize=3)  # um índice por idioma
 def indice(documentos: tuple[tuple[str, str, Path], ...]) -> list[dict[str, str]]:
     """Uma entrada por seção (título de nível 1 a 3) de cada documento."""
     secoes = []
