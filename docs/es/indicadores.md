@@ -1,4 +1,4 @@
-<!-- traduzido de: cf05adec5762 -->
+<!-- traduzido de: bb3b58453a1f -->
 # Indicadores: definición, fórmula, denominador, período y SQL
 
 Todos se calculan en la base de datos (schema `mart`); la pantalla solo los muestra. El mismo SQL aparece en cada gráfico en "¿Cómo lo calculamos? → Ver la consulta SQL". Las definiciones vienen del [BDR-001](bdr/BDR-001-definicoes-de-uso-e-retorno.md).
@@ -123,8 +123,8 @@ GROUP BY r.tema ORDER BY pct_pessoas DESC;
 
 | | |
 |---|---|
-| Definición | cuántos puntos porcentuales más o menos vuelven con la característica, comparando personas parecidas |
-| Fórmula | efecto marginal medio de una regresión logística con todos los factores y la época; IC 95% por el método delta |
+| Definición | cuánto más o menos vuelven las personas con la característica, comparando personas parecidas. En la pantalla, en % del retorno del grupo de comparación ("vuelve 74% menos") |
+| Fórmula | efecto marginal medio de una regresión logística con todos los factores y la época, dividido por el retorno del grupo de comparación; IC 95% por el método delta |
 | Denominador | las 2.266 personas elegibles |
 | Período | toda la base (1.er uso entre el 22/04/2023 y el 21/04/2024) |
 | Muestra pequeña | el grupo con menos de 30 personas sale de la API sin números y no aparece |
@@ -137,7 +137,7 @@ SELECT fator, rotulo, nivel, referencia, n, retorno_pct, retorno_ref_pct,
 FROM mart.efeitos;
 ```
 
-## 6. ¿GPT-4 hace diferencia? (La respuesta)
+## 6. ¿GPT-4 hace diferencia? (calculado en la carga)
 
 | | |
 |---|---|
@@ -153,7 +153,7 @@ Calculado en la carga (`analise/efeitos.py`) y guardado en `mart.gpt4_selecao`:
 SELECT metodo, detalhe, dif_pp, lo, hi, n FROM mart.gpt4_selecao;
 ```
 
-## 7. ¿La semana cambió por perfil o por tasa? (La respuesta)
+## 7. ¿La semana cambió por perfil o por tasa? (calculado en la carga)
 
 | | |
 |---|---|

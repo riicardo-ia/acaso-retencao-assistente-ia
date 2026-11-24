@@ -15,8 +15,8 @@ O público é de negócio, não estatístico, e o dashboard é um self-host BI: 
 | Frases automáticas | texto livre por LLM · **regras fixas com trava estatística** | Só "confirmada" com 30+ pessoas e diferença acima da margem de erro com 99% de confiança |
 | Amostra mínima | sem limite · esconder só na tela · **esconder na API** | Com menos de 30 pessoas, a API não devolve nenhum número do grupo; a tela mostra "menos de 30" ou "poucas pessoas", sem conclusão |
 | Linguagem | termos estatísticos · **linguagem simples, com o detalhe técnico recolhível** | "margem de erro", "comparando pessoas parecidas", "pode ser acaso" |
-| Unidade | "de cada 100 pessoas" · **%** | Retornos em % com uma casa decimal e margem de erro; diferenças em pontos percentuais, com um exemplo de leitura na tela |
-| Organização da tela A resposta | gráficos por tema · **um bloco por pergunta do cliente** | Cada pergunta é o título do seu gráfico, com a resposta em uma frase; as ressalvas (comparação simples, causa só com A/B) ficam no próprio bloco para não induzir a erro |
+| Unidade | "de cada 100 pessoas" · pontos percentuais · **%** | Retornos em % com uma casa decimal e a margem de erro nas pontas; o peso de cada fator também em %, em relação ao grupo de comparação ("volta 74% menos"), mais fácil de ler que pontos percentuais |
+| Organização da tela A resposta | gráficos por tema · **um bloco por pergunta do cliente** | Cada pergunta é o título do seu gráfico, com a resposta em uma frase; cada linha mostra só o dado do próprio fator (valor medido no meio, margem de erro nas pontas), sem grupo de comparação desenhado; o detalhe fica em "Como calculamos?" |
 
 ## O que o dashboard mostra e o que nunca mostra
 

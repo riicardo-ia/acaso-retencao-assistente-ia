@@ -1,4 +1,4 @@
-<!-- traduzido de: 602baf3c0007 -->
+<!-- traduzido de: c3afb4ae7063 -->
 # BDR-003 · Qué muestra el dashboard: dos pantallas, cinco filtros, muestra mínima y datos personales
 
 **Decidido por:** Ricardo · **Estado:** aprobado
@@ -16,8 +16,8 @@ El público es de negocio, no estadístico, y el dashboard es un BI de autoservi
 | Frases automáticas | texto libre por LLM · **reglas fijas con traba estadística** | "Confirmada" solo con 30+ personas y una diferencia por encima del margen de error con 99% de confianza |
 | Muestra mínima | sin límite · esconder solo en la pantalla · **esconder en la API** | Con menos de 30 personas, la API no devuelve ningún número del grupo; la pantalla muestra "menos de 30" o "pocas personas", sin conclusión |
 | Lenguaje | términos estadísticos · **lenguaje simple, con el detalle técnico desplegable** | "margen de error", "comparando personas parecidas", "puede ser azar" |
-| Unidad | "de cada 100 personas" · **%** | Retornos en % con un decimal y margen de error; diferencias en puntos porcentuales, con un ejemplo de lectura en la pantalla |
-| Organización de la pantalla La respuesta | gráficos por tema · **un bloque por pregunta del cliente** | Cada pregunta es el título de su gráfico, con la respuesta en una frase; las salvedades (comparación simple, causa solo con A/B) quedan en el propio bloque para no inducir a error |
+| Unidad | "de cada 100 personas" · puntos porcentuales · **%** | Retornos en % con un decimal y el margen de error en las puntas; el peso de cada factor también en %, en relación con el grupo de comparación ("vuelve 74% menos"), más fácil de leer que los puntos porcentuales |
+| Organización de la pantalla La respuesta | gráficos por tema · **un bloque por pregunta del cliente** | Cada pregunta es el título de su gráfico, con la respuesta en una frase; cada fila muestra solo el dato del propio factor (valor medido en el medio, margen de error en las puntas), sin grupo de comparación dibujado; el detalle queda en "¿Cómo lo calculamos?" |
 
 ## Qué muestra el dashboard y qué nunca muestra
 

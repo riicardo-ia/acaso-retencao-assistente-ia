@@ -1,4 +1,4 @@
-<!-- traduzido de: 602baf3c0007 -->
+<!-- traduzido de: c3afb4ae7063 -->
 # BDR-003 · What the dashboard shows: two screens, five filters, minimum sample and personal data
 
 **Decided by:** Ricardo · **Status:** approved
@@ -16,8 +16,8 @@ The audience is business people, not statisticians, and the dashboard is a self-
 | Automatic sentences | free text by an LLM · **fixed rules with a statistical lock** | "Confirmed" only with 30+ people and a difference above the margin of error with 99% confidence |
 | Minimum sample | no limit · hide only on the screen · **hide in the API** | With fewer than 30 people, the API returns no number for the group; the screen shows "fewer than 30" or "few people", with no conclusion |
 | Language | statistical terms · **plain language, with the technical detail collapsible** | "margin of error", "comparing similar people", "may be chance" |
-| Unit | "out of every 100 people" · **%** | Returns in % with one decimal place and margin of error; differences in percentage points, with a reading example on the screen |
-| Layout of The answer screen | charts by subject · **one block per client question** | Each question is the title of its chart, with the answer in one sentence; the caveats (simple comparison, cause only with A/B) stay in the block itself so as not to mislead |
+| Unit | "out of every 100 people" · percentage points · **%** | Returns in % with one decimal place and the margin of error at the ends; the weight of each factor also in %, relative to the comparison group ("comes back 74% less"), easier to read than percentage points |
+| Layout of The answer screen | charts by subject · **one block per client question** | Each question is the title of its chart, with the answer in one sentence; each row shows only the factor's own data (measured value in the middle, margin of error at the ends), with no comparison group drawn; the detail stays in "How do we calculate it?" |
 
 ## What the dashboard shows and what it never shows
 

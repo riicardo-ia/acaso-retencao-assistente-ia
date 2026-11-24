@@ -20,7 +20,7 @@
 | AN-1-02 | Quais fatores têm o maior efeito e quanto pesa cada um | Efeitos com intervalo de confiança, ordenados | P0 | E3 | feito · 06 §1 |
 | AN-1-03 | Quanto disso é causa e não seleção | Bruto × ajustado, tratamento de confusão e limites declarados | P0 | E3 | feito · 06 §2 (regressão, IPW, regime de oferta) |
 | AN-1-04 | Análise estatística, não só descritiva: efeito de cada fator com sua incerteza | Todo efeito com intervalo de confiança | P0 | E3 | feito |
-| AN-1-05 | Recomendar o que mudar ao cliente | Recomendações ligadas aos achados | P0 | E3/E7 | feito · 06 §4 e tela A resposta |
+| AN-1-05 | Recomendar o que mudar ao cliente | Recomendações ligadas aos achados | P0 | E3/E7 | feito · 06 §4 e DOCUMENTO §1 |
 
 ### A2 · §2 Base de dados
 
@@ -102,7 +102,7 @@
 | IN-3.3-10 | *(extra)* Quem lê consegue conferir: n, margem de erro, método, SQL, sensibilidade, bruto × ajustado | Recursos nas telas | P0 | E6 | feito |
 | IN-3.3-11 | *(extra)* Duas telas: A resposta (fixa, abre primeiro) e Explorar (5 filtros principais, frases por regra) | BDR-003 e telas | P0 | E6 | feito · filtros validados contra o banco |
 | IN-3.3-12 | *(extra)* Layout responsivo, identidade visual da Acaso, gráficos comuns e linguagem simples | Telas | P1 | E6 | feito |
-| IN-3.3-13 | *(extra)* As três perguntas do cliente respondidas no topo, uma por bloco: o que faz voltar (retorno por grupo), quais fatores (efeitos com margem de erro) e quanto é causa e não seleção (bruto × ajustado) | Tela A resposta | P0 | E6 | feito |
+| IN-3.3-13 | *(extra)* As três perguntas do cliente respondidas no topo, uma por bloco: o que faz voltar (retorno por grupo), quais fatores (retorno de cada fator com a margem de erro) e quanto pesa cada um (em %, comparando pessoas parecidas) | Tela A resposta | P0 | E6 | feito |
 | IN-3.3-14 | *(extra)* Retorno semana a semana com a faixa do acaso e a semana analisada em destaque | Tela A resposta | P1 | E6 | feito |
 | IN-3.3-15 | *(extra)* Telas e documentos em português, inglês e espanhol, com testes que impedem frase sem tradução e documento traduzido desatualizado | Seletor no topo e `i18n.json` | P1 | E6 | feito · `tests/test_traducoes.py` |
 | IN-3.3-16 | *(extra)* Documentação dentro do dashboard (decisões, análise, indicadores, arquitetura) | Página Documentação | P1 | E6 | feito |

@@ -1,4 +1,4 @@
-<!-- traduzido de: cf05adec5762 -->
+<!-- traduzido de: bb3b58453a1f -->
 # Indicators: definition, formula, denominator, period and SQL
 
 All of them are calculated in the database (`mart` schema); the screen only displays them. The same SQL appears in each chart under "How do we calculate it? → See the SQL query". The definitions come from [BDR-001](bdr/BDR-001-definicoes-de-uso-e-retorno.md).
@@ -123,8 +123,8 @@ GROUP BY r.tema ORDER BY pct_pessoas DESC;
 
 | | |
 |---|---|
-| Definition | how many percentage points more or fewer people come back with the characteristic, comparing similar people |
-| Formula | average marginal effect of a logistic regression with all factors and the period; 95% CI by the delta method |
+| Definition | how much more or less people with the characteristic come back, comparing similar people. On the screen, in % of the comparison group's return ("comes back 74% less") |
+| Formula | average marginal effect of a logistic regression with all factors and the period, divided by the comparison group's return; 95% CI by the delta method |
 | Denominator | the 2,266 eligible people |
 | Period | whole base (1st use between 04/22/2023 and 04/21/2024) |
 | Small sample | a group with fewer than 30 people comes out of the API with no numbers and does not appear |
@@ -137,7 +137,7 @@ SELECT fator, rotulo, nivel, referencia, n, retorno_pct, retorno_ref_pct,
 FROM mart.efeitos;
 ```
 
-## 6. Does GPT-4 make a difference? (The answer)
+## 6. Does GPT-4 make a difference? (computed in the load)
 
 | | |
 |---|---|
@@ -153,7 +153,7 @@ Calculated in the load (`analise/efeitos.py`) and stored in `mart.gpt4_selecao`:
 SELECT metodo, detalhe, dif_pp, lo, hi, n FROM mart.gpt4_selecao;
 ```
 
-## 7. Did the week change by profile or by rate? (The answer)
+## 7. Did the week change by profile or by rate? (computed in the load)
 
 | | |
 |---|---|

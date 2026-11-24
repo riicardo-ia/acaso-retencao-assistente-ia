@@ -122,8 +122,8 @@ GROUP BY r.tema ORDER BY pct_pessoas DESC;
 
 | | |
 |---|---|
-| Definição | quantos pontos percentuais a mais ou a menos voltam com a característica, comparando pessoas parecidas |
-| Fórmula | efeito marginal médio de uma regressão logística com todos os fatores e a época; IC 95% pelo método delta |
+| Definição | quanto a mais ou a menos voltam as pessoas com a característica, comparando pessoas parecidas. Na tela, em % do retorno do grupo de comparação ("volta 74% menos") |
+| Fórmula | efeito marginal médio de uma regressão logística com todos os fatores e a época, dividido pelo retorno do grupo de comparação; IC 95% pelo método delta |
 | Denominador | as 2.266 pessoas elegíveis |
 | Período | base inteira (1º uso entre 22/04/2023 e 21/04/2024) |
 | Amostra pequena | grupo com menos de 30 pessoas sai sem números da API e não aparece |
@@ -136,7 +136,7 @@ SELECT fator, rotulo, nivel, referencia, n, retorno_pct, retorno_ref_pct,
 FROM mart.efeitos;
 ```
 
-## 6. O GPT-4 faz diferença? (A resposta)
+## 6. O GPT-4 faz diferença? (calculado na carga)
 
 | | |
 |---|---|
@@ -152,7 +152,7 @@ Calculado na carga (`analise/efeitos.py`) e gravado em `mart.gpt4_selecao`:
 SELECT metodo, detalhe, dif_pp, lo, hi, n FROM mart.gpt4_selecao;
 ```
 
-## 7. A semana mudou por perfil ou por taxa? (A resposta)
+## 7. A semana mudou por perfil ou por taxa? (calculado na carga)
 
 | | |
 |---|---|
